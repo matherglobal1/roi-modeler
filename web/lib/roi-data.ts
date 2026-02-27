@@ -46,6 +46,7 @@ export type RoiScenario = {
 
 export type RoiClientData = {
   clientId: string;
+  displayName?: string;
   scenarios: RoiScenario[];
 };
 
@@ -61,6 +62,13 @@ type ParsedFileName = {
   kind: "summary" | "recommendation";
   timestamp: string;
 };
+
+type ClientProfile = {
+  client_id?: string;
+  display_name?: string;
+};
+
+const ROAS_CALIBRATION_FACTOR = 0.5;
 
 const OUTPUT_FILE_RE =
   /^([a-z0-9_]+?)(?:_(pipeline|revenue|roas|cac))?_(summary|recommendation)_(\d{8}_\d{6})\.(json|csv)$/i;
@@ -145,7 +153,47 @@ function parseCsvToObjects(csvText: string): Record<string, string | number | bo
 async function readDemoSnapshot(): Promise<RoiSnapshot> {
   const demoPath = path.resolve(process.cwd(), "data", "demo-snapshot.json");
   const raw = await fs.readFile(demoPath, "utf8");
-  return JSON.parse(raw) as RoiSnapshot;
+  const parsed = JSON.parse(raw) as RoiSnapshot;
+  return applyRoasCalibration(parsed);
+}
+
+function prettifyClientId(clientId: string): string {
+  return clientId
+    .replace(/_\d{6,}$/g, "")
+    .replaceAll("_", " ")
+    .trim();
+}
+
+function applyRoasCalibration(snapshot: RoiSnapshot): RoiSnapshot {
+  return {
+    ...snapshot,
+    clients: snapshot.clients.map((client) => ({
+      ...client,
+      scenarios: client.scenarios.map((scenario) => ({
+        ...scenario,
+        summary: {
+          ...scenario.summary,
+          overall_roas: Number(
+            (Number(scenario.summary.overall_roas ?? 0) * ROAS_CALIBRATION_FACTOR).toFixed(4),
+          ),
+        },
+        recommendations: scenario.recommendations.map((row) => ({
+          ...row,
+          pred_roas: Number((Number(row.pred_roas ?? 0) * ROAS_CALIBRATION_FACTOR).toFixed(4)),
+        })),
+      })),
+    })),
+  };
+}
+
+async function readClientProfile(outputDir: string, clientId: string): Promise<ClientProfile | null> {
+  const profilePath = path.join(outputDir, "..", `${clientId}_profile.json`);
+  try {
+    const raw = await fs.readFile(profilePath, "utf8");
+    return JSON.parse(raw) as ClientProfile;
+  } catch {
+    return null;
+  }
 }
 
 export async function loadRoiSnapshot(): Promise<RoiSnapshot> {
@@ -214,27 +262,33 @@ export async function loadRoiSnapshot(): Promise<RoiSnapshot> {
       clientsMap.set(value.clientId, scenarios);
     }
 
-    const clients = Array.from(clientsMap.entries())
-      .map(([clientId, scenarios]) => ({
-        clientId,
-        scenarios: scenarios.sort((a, b) => {
+    const clients = await Promise.all(
+      Array.from(clientsMap.entries()).map(async ([clientId, scenarios]) => {
+        const profile = await readClientProfile(outputDir, clientId);
+        return {
+          clientId,
+          displayName: profile?.display_name || prettifyClientId(clientId),
+          scenarios: scenarios.sort((a, b) => {
           if (a.timestamp === b.timestamp) {
             return a.objective.localeCompare(b.objective);
           }
           return b.timestamp.localeCompare(a.timestamp);
-        }),
-      }))
+          }),
+        };
+      }),
+    );
+    const sortedClients = clients
       .sort((a, b) => a.clientId.localeCompare(b.clientId));
 
-    if (clients.length === 0) {
+    if (sortedClients.length === 0) {
       return await readDemoSnapshot();
     }
 
-    return {
+    return applyRoasCalibration({
       generatedAt: new Date().toISOString(),
       source: "optimizer_outputs",
-      clients,
-    };
+      clients: sortedClients,
+    });
   } catch {
     return await readDemoSnapshot();
   }

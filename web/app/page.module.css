@@ -41,6 +41,17 @@
   letter-spacing: -0.02em;
 }
 
+.preparedFor {
+  margin-top: 0.7rem;
+  color: var(--text-muted);
+  font-size: 0.98rem;
+}
+
+.preparedFor strong {
+  color: var(--text-strong);
+  font-weight: 700;
+}
+
 .heroSubtitle {
   margin-top: 0.95rem;
   color: var(--text-muted);
@@ -63,6 +74,22 @@
   background: rgba(20, 184, 166, 0.12);
   color: #0f766e;
   font-weight: 600;
+}
+
+.exportButton {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #ffffff;
+  border-radius: 0.6rem;
+  min-height: 2.3rem;
+  padding: 0.4rem 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.exportButton:hover {
+  background: #0f766e;
+  border-color: #0f766e;
 }
 
 .controlsSection {
@@ -355,6 +382,14 @@
   color: var(--text-muted);
 }
 
+.footerNote {
+  border-top: 1px solid rgba(15, 23, 42, 0.1);
+  padding-top: 1rem;
+  color: #64748b;
+  font-size: 0.9rem;
+  text-align: right;
+}
+
 @keyframes rise {
   from {
     opacity: 0;
@@ -379,6 +414,10 @@
 
   .heroMeta {
     justify-items: start;
+  }
+
+  .footerNote {
+    text-align: left;
   }
 
   .controlsSection {
@@ -411,5 +450,29 @@
 @media (max-width: 660px) {
   .metricSection {
     grid-template-columns: 1fr;
+  }
+}
+
+@media print {
+  .page {
+    width: 100%;
+    padding: 0;
+    gap: 0.8rem;
+  }
+
+  .heroSection,
+  .controlsSection,
+  .metricSection,
+  .chartSection,
+  .tableSection {
+    padding-block: 0.8rem;
+  }
+
+  .exportButton {
+    display: none;
+  }
+
+  .tableWrap table {
+    min-width: 0;
   }
 }

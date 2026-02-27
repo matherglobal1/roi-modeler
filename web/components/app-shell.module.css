@@ -116,3 +116,24 @@
     min-height: calc(100vh - 10rem);
   }
 }
+
+@media print {
+  .shell {
+    display: block;
+    background: #ffffff;
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .viewport {
+    padding: 0;
+  }
+
+  .content {
+    border: none;
+    border-radius: 0;
+    min-height: 0;
+  }
+}

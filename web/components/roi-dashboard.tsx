@@ -76,6 +76,13 @@ function sourceLabel(source: RoiSnapshot["source"]): string {
   return "Optimizer Output";
 }
 
+function formatClientName(clientId: string, displayName?: string): string {
+  if (displayName && displayName.trim().length > 0) {
+    return displayName;
+  }
+  return clientId.replace(/_\d{6,}$/g, "").replaceAll("_", " ").trim();
+}
+
 type DashboardProps = {
   snapshot: RoiSnapshot;
   initialClientId?: string;
@@ -138,6 +145,10 @@ export default function RoiDashboard({ snapshot, initialClientId, initialScenari
     setScenarioId(nextClient?.scenarios[0]?.id ?? "");
   }
 
+  function handleExportPdf() {
+    window.print();
+  }
+
   if (!scenario || !selectedClient) {
     return (
       <main className={styles.page}>
@@ -155,11 +166,17 @@ export default function RoiDashboard({ snapshot, initialClientId, initialScenari
         <div>
           <p className={styles.kicker}>ROI Modeller</p>
           <h1 className={styles.commandTitle}>Command Center</h1>
+          <p className={styles.preparedFor}>
+            Prepared for: <strong>{formatClientName(selectedClient.clientId, selectedClient.displayName)}</strong>
+          </p>
           <p className={styles.heroSubtitle}>
             Strategic budget recommendations across channels, built for executive review and weekly decision velocity.
           </p>
         </div>
         <div className={styles.heroMeta}>
+          <button type="button" className={styles.exportButton} onClick={handleExportPdf}>
+            Export to PDF
+          </button>
           <span className={styles.sourcePill}>{sourceLabel(snapshot.source)}</span>
           <span>{formatObjective(scenario.objective)} objective</span>
         </div>
@@ -299,6 +316,8 @@ export default function RoiDashboard({ snapshot, initialClientId, initialScenari
           </table>
         </div>
       </section>
+
+      <footer className={styles.footerNote}>Powered by Just Global Strategy Team</footer>
     </main>
   );
 }

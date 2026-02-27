@@ -144,6 +144,17 @@ run_defaults:
   await fs.writeFile(configPath, payload, "utf8");
 }
 
+async function writeClientProfile(repoRoot: string, clientId: string, displayName: string): Promise<void> {
+  const profilePath = path.join(repoRoot, "data", "canonical", `${clientId}_profile.json`);
+  const payload = {
+    client_id: clientId,
+    display_name: displayName,
+    updated_at: new Date().toISOString(),
+  };
+  await fs.mkdir(path.dirname(profilePath), { recursive: true });
+  await fs.writeFile(profilePath, JSON.stringify(payload, null, 2), "utf8");
+}
+
 function pickFirst(row: CsvRow, keys: string[]): string | undefined {
   for (const key of keys) {
     const direct = row[key];
@@ -315,6 +326,7 @@ export async function POST(req: Request) {
 
   const base = slugify(clientLabel || path.basename(file.name, ext) || "uploaded_client");
   const clientId = `${base}_${Date.now().toString().slice(-6)}`;
+  const displayName = (clientLabel || labelFromClientId(base)).trim() || "Uploaded Client";
   const tempPath = path.join(uploadsDir, `${clientId}${ext}`);
   await fs.writeFile(tempPath, Buffer.from(await file.arrayBuffer()));
 
@@ -354,6 +366,7 @@ export async function POST(req: Request) {
 
     const effectiveBudget = totalBudget > 0 ? totalBudget : 100000;
     await ensureClientConfig(repoRoot, clientId, effectiveBudget);
+    await writeClientProfile(repoRoot, clientId, displayName);
 
     for (const objective of OBJECTIVES) {
       await runPythonScript(repoRoot, "scripts/run_optimizer.py", [
@@ -371,6 +384,7 @@ export async function POST(req: Request) {
       {
         success: true,
         clientId,
+        displayName,
         source: "live",
         snapshot,
       },
@@ -388,4 +402,8 @@ export async function POST(req: Request) {
       { status: 500 },
     );
   }
+}
+
+function labelFromClientId(clientId: string): string {
+  return clientId.replaceAll("_", " ").trim();
 }
