@@ -1,15 +1,16 @@
 :root {
-  --bg-canvas: #f8f4eb;
-  --bg-panel: rgba(255, 255, 255, 0.72);
-  --bg-panel-strong: rgba(255, 255, 255, 0.92);
-  --text-strong: #1f2428;
-  --text-muted: #5f6b73;
-  --line: rgba(31, 36, 40, 0.12);
-  --accent: #0b7d77;
-  --accent-2: #d86828;
-  --success: #1e8f4d;
-  --warn: #b05618;
-  --shadow: 0 16px 40px rgba(59, 64, 67, 0.14);
+  --bg-canvas: #f1f5f9;
+  --bg-section: #f8fafc;
+  --bg-panel: #ffffff;
+  --bg-panel-strong: #ffffff;
+  --text-strong: #0f172a;
+  --text-muted: #475569;
+  --line: rgba(15, 23, 42, 0.09);
+  --accent: #14b8a6;
+  --accent-strong: #0f766e;
+  --success: #15803d;
+  --warn: #b45309;
+  --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
 }
 
 * {
@@ -25,11 +26,8 @@ body {
 
 body {
   color: var(--text-strong);
-  font-family: var(--font-ui), "Segoe UI", sans-serif;
-  background:
-    radial-gradient(circle at 8% 12%, rgba(216, 104, 40, 0.2), transparent 32%),
-    radial-gradient(circle at 92% 6%, rgba(11, 125, 119, 0.24), transparent 34%),
-    linear-gradient(180deg, #fcf7ef 0%, #f2ece2 100%);
+  font-family: var(--font-body), "Segoe UI", sans-serif;
+  background: var(--bg-canvas);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

@@ -1,240 +1,333 @@
 .page {
-  width: min(1200px, 100%);
+  width: min(1280px, 100%);
   margin: 0 auto;
-  padding: 2.5rem 1.2rem 3rem;
+  padding: 2.5rem 2rem 3rem;
   display: grid;
-  gap: 1.2rem;
+  gap: 2rem;
 }
 
-.hero {
+.heroSection,
+.controlsSection,
+.metricSection,
+.chartSection,
+.tableSection {
+  padding-block: 2rem;
+}
+
+.heroSection {
   border: 1px solid var(--line);
-  background: linear-gradient(130deg, rgba(255, 255, 255, 0.9), rgba(244, 251, 250, 0.82));
-  border-radius: 1.25rem;
-  padding: 1.5rem;
-  box-shadow: var(--shadow);
-  animation: rise 480ms ease-out both;
-}
-
-.heroTopline {
+  border-radius: 1.2rem;
+  background: linear-gradient(160deg, #ffffff 0%, #f8fafc 100%);
+  padding-inline: 2rem;
   display: flex;
+  align-items: end;
   justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
+  gap: 1.5rem;
 }
 
 .kicker {
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--accent);
+  letter-spacing: 0.08em;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--accent-strong);
 }
 
-.sourceTag {
-  font-size: 0.78rem;
-  border-radius: 999px;
-  padding: 0.32rem 0.72rem;
-  border: 1px solid rgba(11, 125, 119, 0.32);
-  background: rgba(11, 125, 119, 0.08);
-  color: #055651;
+.commandTitle {
+  margin-top: 0.35rem;
+  font-family: var(--font-heading), "Segoe UI", sans-serif;
+  font-size: clamp(2.2rem, 5.4vw, 4rem);
+  line-height: 0.96;
+  letter-spacing: -0.02em;
 }
 
-.headline {
-  margin-top: 0.7rem;
-  font-family: var(--font-display), "Georgia", serif;
-  font-size: clamp(1.9rem, 4vw, 3rem);
-  line-height: 1.04;
-  max-width: 18ch;
-}
-
-.subtitle {
-  margin-top: 0.85rem;
-  max-width: 72ch;
+.heroSubtitle {
+  margin-top: 0.95rem;
   color: var(--text-muted);
-  line-height: 1.55;
+  max-width: 60ch;
+  line-height: 1.6;
 }
 
-.controlPanel {
+.heroMeta {
   display: grid;
-  gap: 1rem;
-  grid-template-columns: 1fr;
-  border: 1px solid var(--line);
-  background: var(--bg-panel);
-  border-radius: 1.15rem;
-  padding: 1rem;
-  backdrop-filter: blur(6px);
-  animation: rise 520ms ease-out both;
+  justify-items: end;
+  gap: 0.65rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
 }
 
-.controlGroup {
+.sourcePill {
+  border-radius: 999px;
+  padding: 0.35rem 0.8rem;
+  border: 1px solid rgba(20, 184, 166, 0.45);
+  background: rgba(20, 184, 166, 0.12);
+  color: #0f766e;
+  font-weight: 600;
+}
+
+.controlsSection {
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: #f8fafc;
+  padding-inline: 1.6rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 1rem;
+  align-items: end;
+}
+
+.controlField {
   display: grid;
   gap: 0.5rem;
 }
 
-.controlLabel {
-  font-size: 0.77rem;
-  font-weight: 700;
+.controlField span {
+  font-size: 0.78rem;
+  font-weight: 600;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
 }
 
-.chipRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.chip {
-  border: 1px solid rgba(31, 36, 40, 0.15);
-  background: rgba(255, 255, 255, 0.74);
+.controlField select {
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  border-radius: 0.65rem;
+  min-height: 2.8rem;
+  padding: 0.6rem 0.9rem;
+  background: #ffffff;
   color: var(--text-strong);
-  border-radius: 999px;
-  padding: 0.45rem 0.8rem;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: transform 140ms ease, border-color 140ms ease, background-color 140ms ease;
+  font-size: 0.98rem;
 }
 
-.chip:hover {
-  transform: translateY(-1px);
-}
-
-.chipActive {
-  background: #0b7d77;
-  color: #f7fffd;
-  border-color: #0b7d77;
-}
-
-.metaPanel {
-  border-top: 1px solid var(--line);
-  padding-top: 0.75rem;
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.8rem;
-  font-size: 0.86rem;
-  color: var(--text-muted);
-}
-
-.metaPanel strong {
-  color: var(--text-strong);
-}
-
-.metricGrid {
+.healthField {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.7rem;
+  gap: 0.35rem;
+  justify-items: end;
+}
+
+.healthField span {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.healthField strong {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.metricSection {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
 }
 
 .metricCard {
   border: 1px solid var(--line);
   border-radius: 1rem;
-  background: var(--bg-panel-strong);
-  padding: 0.85rem 1rem;
+  background: #ffffff;
+  box-shadow: var(--shadow);
+  padding: 1.35rem 1.25rem;
   display: grid;
   gap: 0.35rem;
-  box-shadow: 0 8px 22px rgba(56, 62, 66, 0.1);
   opacity: 0;
   transform: translateY(10px);
   animation: rise 420ms ease-out var(--delay, 0ms) forwards;
 }
 
 .metricCard span {
-  color: var(--text-muted);
   font-size: 0.82rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .metricCard strong {
-  font-size: clamp(1.08rem, 2vw, 1.58rem);
+  font-family: var(--font-heading), "Segoe UI", sans-serif;
+  font-size: clamp(1.45rem, 2.6vw, 2.1rem);
+  line-height: 1.1;
 }
 
-.mainGrid {
-  display: grid;
-  gap: 0.9rem;
-  grid-template-columns: 1fr;
-}
-
-.panel {
+.chartSection {
   border: 1px solid var(--line);
-  border-radius: 1.1rem;
-  background: var(--bg-panel-strong);
-  padding: 1rem;
-  box-shadow: 0 12px 28px rgba(58, 63, 67, 0.1);
+  border-radius: 1rem;
+  background: #ffffff;
+  padding-inline: 1.6rem;
+}
+
+.chartPanel {
+  display: grid;
+  gap: 1.15rem;
 }
 
 .panelHeader h2 {
-  font-size: 1.06rem;
+  font-family: var(--font-heading), "Segoe UI", sans-serif;
+  font-size: 1.5rem;
+  line-height: 1.15;
 }
 
 .panelHeader p {
+  margin-top: 0.3rem;
   color: var(--text-muted);
-  margin-top: 0.2rem;
-  font-size: 0.86rem;
+}
+
+.chartBody {
+  display: grid;
+  grid-template-columns: 1.5fr minmax(280px, 0.9fr);
+  gap: 1.4rem;
 }
 
 .barList {
-  margin-top: 0.9rem;
   display: grid;
-  gap: 0.8rem;
+  gap: 0.95rem;
 }
 
 .barRow {
+  padding: 0.75rem 0.8rem;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 0.8rem;
+  background: #ffffff;
   display: grid;
-  gap: 0.28rem;
+  gap: 0.45rem;
 }
 
 .barMeta {
   display: flex;
   justify-content: space-between;
-  font-size: 0.9rem;
-  gap: 0.8rem;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.barMeta strong {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.barMeta span {
+  color: var(--text-strong);
+  font-weight: 600;
 }
 
 .barTrack {
-  height: 0.55rem;
+  height: 0.72rem;
   border-radius: 999px;
-  background: rgba(95, 107, 115, 0.16);
+  background: #e2e8f0;
 }
 
 .barFill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--accent), #28a89e 65%, #53c6bc);
+  background: linear-gradient(90deg, #14b8a6 0%, #2dd4bf 100%);
 }
 
-.rowStats {
+.barStats {
   display: flex;
   justify-content: space-between;
-  font-size: 0.76rem;
+  color: var(--text-muted);
+  font-size: 0.84rem;
+}
+
+.donutPanel {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 0.95rem;
+  background: #f8fafc;
+  padding: 1rem;
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+}
+
+.donut {
+  width: 220px;
+  height: 220px;
+  border-radius: 999px;
+  margin: 0 auto;
+  position: relative;
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.07);
+}
+
+.donut::after {
+  content: "";
+  position: absolute;
+  inset: 34px;
+  border-radius: inherit;
+  background: #ffffff;
+}
+
+.legend {
+  list-style: none;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.legend li {
+  display: grid;
+  grid-template-columns: 12px 1fr auto;
+  gap: 0.55rem;
+  align-items: center;
+  font-size: 0.84rem;
+}
+
+.legend span {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+}
+
+.legend em {
+  font-style: normal;
   color: var(--text-muted);
 }
 
-.healthStack {
-  margin-top: 0.85rem;
-  display: grid;
-  gap: 0.65rem;
+.legend strong {
+  font-weight: 600;
+  color: var(--text-strong);
 }
 
-.healthItem {
-  border: 1px solid rgba(31, 36, 40, 0.09);
-  border-radius: 0.8rem;
-  padding: 0.72rem 0.78rem;
-  display: grid;
-  gap: 0.22rem;
+.tableSection {
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: #ffffff;
+  padding-inline: 1.6rem;
 }
 
-.healthItem span {
-  color: var(--text-muted);
-  font-size: 0.76rem;
+.tableWrap {
+  margin-top: 1rem;
+  overflow: auto;
+}
+
+.tableWrap table {
+  width: 100%;
+  min-width: 860px;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.tableWrap th,
+.tableWrap td {
+  text-align: left;
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.tableWrap th {
+  font-size: 0.73rem;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
+  color: #64748b;
 }
 
-.healthItem strong {
-  font-size: 0.96rem;
-  word-break: break-word;
+.tableWrap td {
+  font-size: 0.92rem;
+}
+
+.tableWrap tbody tr:nth-child(odd) {
+  background: #f8fafc;
+}
+
+.tableWrap tbody tr:hover {
+  background: #ecfeff;
 }
 
 .pass {
@@ -245,54 +338,16 @@
   color: var(--warn);
 }
 
-.tablePanel {
-  border: 1px solid var(--line);
-  border-radius: 1.1rem;
-  background: var(--bg-panel-strong);
-  padding: 1rem;
-  box-shadow: 0 12px 30px rgba(56, 61, 65, 0.11);
-}
-
-.tableWrap {
-  margin-top: 0.72rem;
-  overflow: auto;
-}
-
-.tableWrap table {
-  width: 100%;
-  min-width: 780px;
-  border-collapse: collapse;
-}
-
-.tableWrap th,
-.tableWrap td {
-  text-align: left;
-  padding: 0.62rem 0.5rem;
-  border-bottom: 1px solid rgba(31, 36, 40, 0.08);
-  font-size: 0.86rem;
-}
-
-.tableWrap thead th {
-  font-size: 0.74rem;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: var(--text-muted);
-}
-
-.tableWrap tbody tr:hover {
-  background: rgba(11, 125, 119, 0.07);
-}
-
 .emptyState {
   border: 1px solid var(--line);
   border-radius: 1rem;
-  background: rgba(255, 255, 255, 0.75);
+  background: #ffffff;
   padding: 2rem;
-  margin-top: 1rem;
+  margin: 2rem;
 }
 
 .emptyState h1 {
-  font-family: var(--font-display), "Georgia", serif;
+  font-family: var(--font-heading), "Segoe UI", sans-serif;
 }
 
 .emptyState p {
@@ -303,7 +358,7 @@
 @keyframes rise {
   from {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -311,30 +366,50 @@
   }
 }
 
-@media (min-width: 820px) {
+@media (max-width: 1080px) {
   .page {
-    padding: 3rem 1.8rem 4rem;
-    gap: 1.4rem;
+    padding: 1.6rem 1rem 2rem;
   }
 
-  .controlPanel {
-    grid-template-columns: 1fr 1fr auto;
-    align-items: end;
+  .heroSection {
+    padding-inline: 1.2rem;
+    display: grid;
+    justify-items: start;
   }
 
-  .metaPanel {
-    border-top: none;
-    padding-top: 0;
-    align-items: center;
-    justify-content: flex-end;
-    text-align: right;
+  .heroMeta {
+    justify-items: start;
   }
 
-  .metricGrid {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+  .controlsSection {
+    grid-template-columns: 1fr;
+    padding-inline: 1rem;
   }
 
-  .mainGrid {
-    grid-template-columns: 1.5fr 1fr;
+  .healthField {
+    justify-items: start;
+  }
+
+  .metricSection {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .chartBody {
+    grid-template-columns: 1fr;
+  }
+
+  .donut {
+    width: 190px;
+    height: 190px;
+  }
+
+  .donut::after {
+    inset: 30px;
+  }
+}
+
+@media (max-width: 660px) {
+  .metricSection {
+    grid-template-columns: 1fr;
   }
 }

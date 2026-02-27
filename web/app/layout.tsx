@@ -1,17 +1,18 @@
 import type { Metadata } from "next";
-import { Fraunces, Space_Grotesk } from "next/font/google";
+import { Inter, Space_Grotesk } from "next/font/google";
+import AppShell from "@/components/app-shell";
 import "./globals.css";
 
-const uiFont = Space_Grotesk({
-  variable: "--font-ui",
-  subsets: ["latin"],
-  weight: ["400", "500", "700"],
-});
-
-const displayFont = Fraunces({
-  variable: "--font-display",
+const headingFont = Space_Grotesk({
+  variable: "--font-heading",
   subsets: ["latin"],
   weight: ["500", "700"],
+});
+
+const bodyFont = Inter({
+  variable: "--font-body",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
 });
 
 export const metadata: Metadata = {
@@ -26,8 +27,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${uiFont.variable} ${displayFont.variable}`}>
-        {children}
+      <body className={`${headingFont.variable} ${bodyFont.variable}`}>
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );
