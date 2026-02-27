@@ -12,14 +12,14 @@ export async function GET() {
     UPLOAD_TEMPLATE_COLUMNS.map((column) => column.header),
     [
       "Acme Software",
+      "January 2026",
       "Paid Search",
-      85000,
-      31000000,
-      7600000,
-      54000,
-      114000,
-      0.74,
+      15000,
+      6200000,
+      1250000,
     ],
+    ["Acme Software", "January 2026", "Paid Social", 12000, 4300000, 920000],
+    ["Acme Software", "February 2026", "Paid Search", 16500, 6500000, 1320000],
   ];
 
   const instructionsRows = [
@@ -30,6 +30,8 @@ export async function GET() {
       column.description,
       column.type === "currency"
         ? "Currency (numbers only or with $)"
+        : column.type === "month"
+          ? "Month text (January 2026) or YYYY-MM"
         : column.type === "number"
           ? "Number"
           : "Text",
@@ -39,14 +41,14 @@ export async function GET() {
     [
       "How to use",
       "",
-      "Fill one row per channel. Keep the headers exactly the same.",
+      "Enter one row per channel per month. Keep the headers exactly the same.",
       "",
       "",
     ],
     [
       "Tip",
       "",
-      "All required fields must be present before upload. Optional beta can be blank.",
+      "The model will aggregate totals and show month-over-month trends.",
       "",
       "",
     ],

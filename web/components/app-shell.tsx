@@ -30,13 +30,16 @@ export default function AppShell({ children }: { children: ReactNode }) {
         <div className={styles.brand}>
           <span className={styles.brandTop}>JUSTGLOBAL</span>
           <div className={styles.logoWrap}>
-            <Image
-              src="/just-global-logo.png"
-              alt="JUST Global"
-              width={160}
-              height={18}
-              priority
-            />
+            <div className={styles.logoImageBox}>
+              <Image
+                src="/just-global-logo.png"
+                alt="JUST Global"
+                width={320}
+                height={36}
+                className={styles.logoImage}
+                priority
+              />
+            </div>
             <strong>ROI Modeller</strong>
           </div>
         </div>

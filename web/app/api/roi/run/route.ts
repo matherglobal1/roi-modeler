@@ -20,6 +20,31 @@ type TabularUpload = {
   rows: string[][];
 };
 
+type MonthlyPoint = {
+  month: string;
+  totalSpend: number;
+  totalPipeline: number;
+  totalRevenue: number;
+};
+
+type RawEntry = {
+  month: string;
+  periodStart: string;
+  channel: string;
+  spend: number;
+  pipeline: number;
+  revenue: number;
+};
+
+type CanonicalPayload = {
+  baselineRows: Array<Record<string, string | number>>;
+  constraintsRows: Array<Record<string, string | number | boolean>>;
+  performanceRows: Array<Record<string, string | number>>;
+  totalBudget: number;
+  displayName: string;
+  monthlyTrend: MonthlyPoint[];
+};
+
 function slugify(value: string): string {
   return value
     .toLowerCase()
@@ -56,6 +81,32 @@ function parseCsvLine(line: string): string[] {
 
 function normalizeHeader(text: string): string {
   return text.trim();
+}
+
+function pad2(value: number): string {
+  return value < 10 ? `0${value}` : String(value);
+}
+
+function parseMonthToPeriodStart(value: string, rowNumber: number): string {
+  const text = value.trim();
+  if (!text) {
+    throw new Error(`Time Period (Month) is required on row ${rowNumber}.`);
+  }
+  const ymMatch = text.match(/^(\d{4})-(\d{2})$/);
+  if (ymMatch) {
+    const month = Number(ymMatch[2]);
+    if (month >= 1 && month <= 12) {
+      return `${ymMatch[1]}-${ymMatch[2]}-01`;
+    }
+  }
+
+  const parsed = new Date(`${text} 1`);
+  if (Number.isNaN(parsed.getTime())) {
+    throw new Error(
+      `Time Period (Month) must look like 'January 2026' or '2026-01' on row ${rowNumber}.`,
+    );
+  }
+  return `${parsed.getFullYear()}-${pad2(parsed.getMonth() + 1)}-01`;
 }
 
 async function readTabularUpload(filePath: string, ext: string): Promise<TabularUpload> {
@@ -97,14 +148,6 @@ function toNumber(raw: string, fieldName: string, rowNumber: number): number {
   return parsed;
 }
 
-type CanonicalPayload = {
-  baselineRows: Array<Record<string, string | number>>;
-  constraintsRows: Array<Record<string, string | number | boolean>>;
-  performanceRows: Array<Record<string, string | number>>;
-  totalBudget: number;
-  displayName: string;
-};
-
 function buildCanonicalFromTemplate(upload: TabularUpload, clientId: string): CanonicalPayload {
   const headerIndex = new Map<string, number>();
   upload.headers.forEach((header, idx) => {
@@ -125,36 +168,26 @@ function buildCanonicalFromTemplate(upload: TabularUpload, clientId: string): Ca
     return idx === undefined ? "" : String(row[idx] ?? "").trim();
   };
 
-  const entries: Array<{
-    channel: string;
-    spend: number;
-    pipeline: number;
-    revenue: number;
-    hqls: number;
-    leads: number;
-    beta: number;
-  }> = [];
+  const entries: RawEntry[] = [];
   let displayName = "";
 
   upload.rows.forEach((row, index) => {
     const rowNumber = index + 2;
     const clientName = getValue(row, "Client Name");
+    const periodRaw = getValue(row, "Time Period (Month)");
     const channel = getValue(row, "Channel");
-    const spendRaw = getValue(row, "Monthly Budget");
-    const pipelineRaw = getValue(row, "Projected Pipeline");
-    const revenueRaw = getValue(row, "Projected Revenue");
-    const hqlRaw = getValue(row, "Projected HQLs");
-    const leadsRaw = getValue(row, "Projected Leads");
-    const betaRaw = getValue(row, "Diminishing Returns Beta (Optional)");
+    const budgetRaw = getValue(row, "Budget");
+    const pipelineRaw = getValue(row, "Expected Pipeline");
+    const revenueRaw = getValue(row, "Expected Revenue");
 
-    const allBlank = [clientName, channel, spendRaw, pipelineRaw, revenueRaw, hqlRaw, leadsRaw].every(
+    const allBlank = [clientName, periodRaw, channel, budgetRaw, pipelineRaw, revenueRaw].every(
       (value) => value.length === 0,
     );
     if (allBlank) {
       return;
     }
 
-    if (!clientName || !channel || !spendRaw || !pipelineRaw || !revenueRaw || !hqlRaw || !leadsRaw) {
+    if (!clientName || !periodRaw || !channel || !budgetRaw || !pipelineRaw || !revenueRaw) {
       throw new Error(`All required fields must be filled on row ${rowNumber}.`);
     }
 
@@ -162,53 +195,82 @@ function buildCanonicalFromTemplate(upload: TabularUpload, clientId: string): Ca
       displayName = clientName;
     }
 
-    const spend = toNumber(spendRaw, "Monthly Budget", rowNumber);
-    const pipeline = toNumber(pipelineRaw, "Projected Pipeline", rowNumber);
-    const revenue = toNumber(revenueRaw, "Projected Revenue", rowNumber);
-    const hqls = toNumber(hqlRaw, "Projected HQLs", rowNumber);
-    const leads = toNumber(leadsRaw, "Projected Leads", rowNumber);
-    const beta = betaRaw ? toNumber(betaRaw, "Diminishing Returns Beta (Optional)", rowNumber) : 0.72;
+    const periodStart = parseMonthToPeriodStart(periodRaw, rowNumber);
+    const spend = toNumber(budgetRaw, "Budget", rowNumber);
+    const pipeline = toNumber(pipelineRaw, "Expected Pipeline", rowNumber);
+    const revenue = toNumber(revenueRaw, "Expected Revenue", rowNumber);
 
     if (spend <= 0) {
-      throw new Error(`Monthly Budget must be greater than zero on row ${rowNumber}.`);
+      throw new Error(`Budget must be greater than zero on row ${rowNumber}.`);
     }
 
     entries.push({
+      month: periodStart.slice(0, 7),
+      periodStart,
       channel,
       spend,
       pipeline,
       revenue,
-      hqls,
-      leads,
-      beta,
     });
   });
 
   if (!entries.length) {
-    throw new Error("No channel rows found. Add at least one channel row to the template.");
+    throw new Error("No channel rows found. Add at least one channel-month row to the template.");
   }
 
-  const totalBudget = entries.reduce((sum, item) => sum + item.spend, 0);
-  const now = new Date().toISOString();
+  const totalBudget = entries.reduce((sum, entry) => sum + entry.spend, 0);
+  const byChannel = new Map<
+    string,
+    { spend: number; pipeline: number; revenue: number }
+  >();
 
-  const baselineRows = entries.map((item) => {
-    const alphaPipeline = item.pipeline / item.spend ** item.beta;
-    const alphaRevenue = item.revenue / item.spend ** item.beta;
-    const alphaHql = item.hqls / item.spend ** item.beta;
-    const alphaLeads = item.leads / item.spend ** item.beta;
+  entries.forEach((entry) => {
+    const current = byChannel.get(entry.channel) ?? { spend: 0, pipeline: 0, revenue: 0 };
+    current.spend += entry.spend;
+    current.pipeline += entry.pipeline;
+    current.revenue += entry.revenue;
+    byChannel.set(entry.channel, current);
+  });
+
+  const byMonth = new Map<string, MonthlyPoint>();
+  entries.forEach((entry) => {
+    const point = byMonth.get(entry.month) ?? {
+      month: entry.month,
+      totalSpend: 0,
+      totalPipeline: 0,
+      totalRevenue: 0,
+    };
+    point.totalSpend += entry.spend;
+    point.totalPipeline += entry.pipeline;
+    point.totalRevenue += entry.revenue;
+    byMonth.set(entry.month, point);
+  });
+
+  const monthlyTrend = Array.from(byMonth.values()).sort((a, b) => a.month.localeCompare(b.month));
+
+  const baselineRows = Array.from(byChannel.entries()).map(([channel, totals]) => {
+    const beta = 0.72;
+    const hqls = Math.max(1, totals.revenue / 200);
+    const leads = hqls * 2.4;
+    const opps = hqls * 0.18;
+    const alphaPipeline = totals.pipeline / totals.spend ** beta;
+    const alphaRevenue = totals.revenue / totals.spend ** beta;
+    const alphaHql = hqls / totals.spend ** beta;
+    const alphaLeads = leads / totals.spend ** beta;
+
     return {
       client_id: clientId,
-      channel: item.channel,
-      baseline_spend: Number(item.spend.toFixed(2)),
-      baseline_share: Number((item.spend / totalBudget).toFixed(6)),
-      engaged_leads: Number(item.leads.toFixed(2)),
-      hqls: Number(item.hqls.toFixed(2)),
-      opps_sourced: Number((item.hqls * 0.18).toFixed(2)),
-      pipeline_sourced: Number(item.pipeline.toFixed(2)),
-      cw_acv_sourced: Number(item.revenue.toFixed(2)),
-      roas_baseline: Number((item.revenue / item.spend).toFixed(4)),
-      cac_baseline: Number((item.spend / Math.max(1, item.hqls)).toFixed(4)),
-      beta: Number(item.beta.toFixed(4)),
+      channel,
+      baseline_spend: Number(totals.spend.toFixed(2)),
+      baseline_share: Number((totals.spend / totalBudget).toFixed(6)),
+      engaged_leads: Number(leads.toFixed(2)),
+      hqls: Number(hqls.toFixed(2)),
+      opps_sourced: Number(opps.toFixed(2)),
+      pipeline_sourced: Number(totals.pipeline.toFixed(2)),
+      cw_acv_sourced: Number(totals.revenue.toFixed(2)),
+      roas_baseline: Number((totals.revenue / totals.spend).toFixed(4)),
+      cac_baseline: Number((totals.spend / Math.max(1, hqls)).toFixed(4)),
+      beta,
       alpha_pipeline: Number(alphaPipeline.toFixed(6)),
       alpha_revenue: Number(alphaRevenue.toFixed(6)),
       alpha_hqls: Number(alphaHql.toFixed(6)),
@@ -236,29 +298,37 @@ function buildCanonicalFromTemplate(upload: TabularUpload, clientId: string): Ca
     };
   });
 
-  const performanceRows = baselineRows.map((row) => ({
-    client_id: clientId,
-    geo: "Global",
-    channel: row.channel,
-    sub_channel: row.channel,
-    platform: "Template Upload",
-    fiscal_year: new Date().getFullYear(),
-    fiscal_quarter: "Q1",
-    quarter_label: "Q1",
-    period_start: `${new Date().getFullYear()}-01-01`,
-    engaged_leads: row.engaged_leads,
-    hqls: row.hqls,
-    opps_sourced: row.opps_sourced,
-    pipeline_sourced: row.pipeline_sourced,
-    pipeline_influenced: row.pipeline_sourced,
-    cw_opps_sourced: row.opps_sourced,
-    cw_acv_sourced: row.cw_acv_sourced,
-    cw_acv_influenced: row.cw_acv_sourced,
-    hql_to_opp_conversion:
-      Number(row.hqls) > 0 ? Number((Number(row.opps_sourced) / Number(row.hqls)).toFixed(4)) : 0,
-    source_file: "upload_template",
-    ingested_at: now,
-  }));
+  const now = new Date().toISOString();
+  const performanceRows = entries.map((entry) => {
+    const dt = new Date(entry.periodStart);
+    const quarter = Math.floor(dt.getMonth() / 3) + 1;
+    const hqls = Math.max(1, entry.revenue / 200);
+    const leads = hqls * 2.4;
+    const opps = hqls * 0.18;
+
+    return {
+      client_id: clientId,
+      geo: "Global",
+      channel: entry.channel,
+      sub_channel: entry.channel,
+      platform: "Template Upload",
+      fiscal_year: dt.getFullYear(),
+      fiscal_quarter: `Q${quarter}`,
+      quarter_label: `Q${quarter}`,
+      period_start: entry.periodStart,
+      engaged_leads: Number(leads.toFixed(2)),
+      hqls: Number(hqls.toFixed(2)),
+      opps_sourced: Number(opps.toFixed(2)),
+      pipeline_sourced: Number(entry.pipeline.toFixed(2)),
+      pipeline_influenced: Number(entry.pipeline.toFixed(2)),
+      cw_opps_sourced: Number(opps.toFixed(2)),
+      cw_acv_sourced: Number(entry.revenue.toFixed(2)),
+      cw_acv_influenced: Number(entry.revenue.toFixed(2)),
+      hql_to_opp_conversion: Number((opps / Math.max(1, hqls)).toFixed(4)),
+      source_file: "upload_template",
+      ingested_at: now,
+    };
+  });
 
   return {
     baselineRows,
@@ -266,6 +336,7 @@ function buildCanonicalFromTemplate(upload: TabularUpload, clientId: string): Ca
     performanceRows,
     totalBudget,
     displayName: displayName || clientId.replaceAll("_", " "),
+    monthlyTrend,
   };
 }
 
@@ -313,11 +384,17 @@ run_defaults:
   await fs.writeFile(configPath, payload, "utf8");
 }
 
-async function writeClientProfile(repoRoot: string, clientId: string, displayName: string): Promise<void> {
+async function writeClientProfile(
+  repoRoot: string,
+  clientId: string,
+  displayName: string,
+  monthlyTrend: MonthlyPoint[],
+): Promise<void> {
   const profilePath = path.join(repoRoot, "data", "canonical", `${clientId}_profile.json`);
   const payload = {
     client_id: clientId,
     display_name: displayName,
+    monthly_trend: monthlyTrend,
     updated_at: new Date().toISOString(),
   };
   await fs.mkdir(path.dirname(profilePath), { recursive: true });
@@ -377,7 +454,7 @@ export async function POST(req: Request) {
 
     await writeCanonicalFiles(repoRoot, clientId, canonical);
     await ensureClientConfig(repoRoot, clientId, canonical.totalBudget || 100000);
-    await writeClientProfile(repoRoot, clientId, displayName);
+    await writeClientProfile(repoRoot, clientId, displayName, canonical.monthlyTrend);
 
     for (const objective of OBJECTIVES) {
       await runPythonScript(repoRoot, [

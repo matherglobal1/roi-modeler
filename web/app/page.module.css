@@ -1,28 +1,23 @@
 .page {
   width: min(1280px, 100%);
   margin: 0 auto;
-  padding: 2.5rem 2rem 3rem;
-  display: grid;
-  gap: 2rem;
 }
 
-.heroSection,
-.controlsSection,
-.metricSection,
-.chartSection,
-.tableSection {
-  padding-block: 2rem;
+.screenOnly {
+  padding: 2.2rem 2rem 2.8rem;
+  display: grid;
+  gap: 1.35rem;
 }
 
 .heroSection {
   border: 1px solid var(--line);
   border-radius: 1.2rem;
   background: linear-gradient(160deg, #ffffff 0%, #f8fafc 100%);
-  padding-inline: 2rem;
+  padding: 1.8rem 2rem;
   display: flex;
   align-items: end;
   justify-content: space-between;
-  gap: 1.5rem;
+  gap: 1.4rem;
 }
 
 .kicker {
@@ -36,13 +31,13 @@
 .commandTitle {
   margin-top: 0.35rem;
   font-family: var(--font-heading), "Segoe UI", sans-serif;
-  font-size: clamp(2.2rem, 5.4vw, 4rem);
+  font-size: clamp(2rem, 5.2vw, 3.8rem);
   line-height: 0.96;
   letter-spacing: -0.02em;
 }
 
 .preparedFor {
-  margin-top: 0.7rem;
+  margin-top: 0.65rem;
   color: var(--text-muted);
   font-size: 0.98rem;
 }
@@ -53,7 +48,7 @@
 }
 
 .heroSubtitle {
-  margin-top: 0.95rem;
+  margin-top: 0.88rem;
   color: var(--text-muted);
   max-width: 60ch;
   line-height: 1.6;
@@ -62,7 +57,7 @@
 .heroMeta {
   display: grid;
   justify-items: end;
-  gap: 0.65rem;
+  gap: 0.6rem;
   color: var(--text-muted);
   font-size: 0.9rem;
 }
@@ -87,274 +82,255 @@
   cursor: pointer;
 }
 
-.exportButton:hover {
-  background: #0f766e;
-  border-color: #0f766e;
-}
-
 .controlsSection {
   border: 1px solid var(--line);
   border-radius: 1rem;
   background: #f8fafc;
-  padding-inline: 1.6rem;
+  padding: 1rem 1.25rem;
   display: grid;
   grid-template-columns: 1fr 1fr auto;
-  gap: 1rem;
+  gap: 0.9rem;
   align-items: end;
 }
 
 .controlField {
   display: grid;
-  gap: 0.5rem;
+  gap: 0.46rem;
 }
 
 .controlField span {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--text-muted);
+  font-size: 0.76rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
+  color: var(--text-muted);
+  font-weight: 600;
 }
 
 .controlField select {
+  min-height: 2.7rem;
   border: 1px solid rgba(15, 23, 42, 0.14);
   border-radius: 0.65rem;
-  min-height: 2.8rem;
-  padding: 0.6rem 0.9rem;
+  padding: 0.56rem 0.82rem;
+  font-size: 0.95rem;
   background: #ffffff;
-  color: var(--text-strong);
-  font-size: 0.98rem;
 }
 
 .healthField {
   display: grid;
-  gap: 0.35rem;
+  gap: 0.3rem;
   justify-items: end;
 }
 
 .healthField span {
-  font-size: 0.74rem;
-  color: var(--text-muted);
-  letter-spacing: 0.06em;
+  font-size: 0.72rem;
   text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
 }
 
 .healthField strong {
-  font-size: 1rem;
   font-weight: 700;
+}
+
+.viewToggleSection {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.viewToggle {
+  display: inline-flex;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.6rem;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.viewToggle button {
+  border: none;
+  background: transparent;
+  min-height: 2rem;
+  padding: 0.28rem 0.85rem;
+  cursor: pointer;
+  color: #475569;
+}
+
+.viewToggleActive {
+  background: #0f766e !important;
+  color: #ffffff !important;
 }
 
 .metricSection {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.8rem;
 }
 
 .metricCard {
   border: 1px solid var(--line);
-  border-radius: 1rem;
+  border-radius: 0.95rem;
   background: #ffffff;
   box-shadow: var(--shadow);
-  padding: 1.35rem 1.25rem;
+  padding: 1.1rem 1rem;
   display: grid;
-  gap: 0.35rem;
+  gap: 0.28rem;
   opacity: 0;
   transform: translateY(10px);
   animation: rise 420ms ease-out var(--delay, 0ms) forwards;
 }
 
 .metricCard span {
-  font-size: 0.82rem;
+  font-size: 0.72rem;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
 }
 
 .metricCard strong {
   font-family: var(--font-heading), "Segoe UI", sans-serif;
-  font-size: clamp(1.45rem, 2.6vw, 2.1rem);
-  line-height: 1.1;
+  font-size: clamp(1.25rem, 2.2vw, 1.8rem);
 }
 
-.chartSection {
-  border: 1px solid var(--line);
-  border-radius: 1rem;
-  background: #ffffff;
-  padding-inline: 1.6rem;
-}
-
-.chartPanel {
-  display: grid;
-  gap: 1.15rem;
-}
-
-.panelHeader h2 {
-  font-family: var(--font-heading), "Segoe UI", sans-serif;
-  font-size: 1.5rem;
-  line-height: 1.15;
-}
-
-.panelHeader p {
-  margin-top: 0.3rem;
-  color: var(--text-muted);
-}
-
-.chartBody {
-  display: grid;
-  grid-template-columns: 1.5fr minmax(280px, 0.9fr);
-  gap: 1.4rem;
-}
-
-.barList {
-  display: grid;
-  gap: 0.95rem;
-}
-
-.barRow {
-  padding: 0.75rem 0.8rem;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 0.8rem;
-  background: #ffffff;
-  display: grid;
-  gap: 0.45rem;
-}
-
-.barMeta {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 1rem;
-}
-
-.barMeta strong {
-  font-size: 1rem;
-  font-weight: 600;
-}
-
-.barMeta span {
-  color: var(--text-strong);
-  font-weight: 600;
-}
-
-.barTrack {
-  height: 0.72rem;
-  border-radius: 999px;
-  background: #e2e8f0;
-}
-
-.barFill {
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, #14b8a6 0%, #2dd4bf 100%);
-}
-
-.barStats {
-  display: flex;
-  justify-content: space-between;
-  color: var(--text-muted);
-  font-size: 0.84rem;
-}
-
-.donutPanel {
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 0.95rem;
-  background: #f8fafc;
-  padding: 1rem;
-  display: grid;
-  gap: 1rem;
-  align-content: start;
-}
-
-.donut {
-  width: 220px;
-  height: 220px;
-  border-radius: 999px;
-  margin: 0 auto;
-  position: relative;
-  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.07);
-}
-
-.donut::after {
-  content: "";
-  position: absolute;
-  inset: 34px;
-  border-radius: inherit;
-  background: #ffffff;
-}
-
-.legend {
-  list-style: none;
-  display: grid;
-  gap: 0.4rem;
-}
-
-.legend li {
-  display: grid;
-  grid-template-columns: 12px 1fr auto;
-  gap: 0.55rem;
-  align-items: center;
-  font-size: 0.84rem;
-}
-
-.legend span {
-  width: 12px;
-  height: 12px;
-  border-radius: 999px;
-}
-
-.legend em {
-  font-style: normal;
-  color: var(--text-muted);
-}
-
-.legend strong {
-  font-weight: 600;
-  color: var(--text-strong);
-}
-
+.compactAllocationSection,
+.monthlySection,
 .tableSection {
   border: 1px solid var(--line);
   border-radius: 1rem;
   background: #ffffff;
-  padding-inline: 1.6rem;
+  padding: 1rem 1.25rem;
 }
 
+.panelHeader h2 {
+  font-family: var(--font-heading), "Segoe UI", sans-serif;
+  font-size: 1.35rem;
+}
+
+.panelHeader p {
+  margin-top: 0.25rem;
+  color: var(--text-muted);
+}
+
+.compactRows {
+  margin-top: 0.8rem;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.compactRow {
+  display: grid;
+  grid-template-columns: 1.4fr auto auto auto 2fr;
+  gap: 0.8rem;
+  align-items: center;
+  padding: 0.52rem 0.62rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.68rem;
+  font-size: 0.88rem;
+}
+
+.compactRow strong {
+  font-size: 0.9rem;
+}
+
+.compactBarTrack {
+  height: 0.52rem;
+  border-radius: 999px;
+  background: #e2e8f0;
+}
+
+.compactBarFill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #14b8a6, #2dd4bf);
+}
+
+.trendLegend {
+  margin-top: 0.7rem;
+  display: flex;
+  gap: 1rem;
+  color: var(--text-muted);
+  font-size: 0.86rem;
+}
+
+.trendLegend i {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  display: inline-block;
+  margin-right: 0.35rem;
+}
+
+.spendDot {
+  background: #0ea5e9;
+}
+
+.pipelineDot {
+  background: #14b8a6;
+}
+
+.trendChart {
+  width: 100%;
+  max-height: 300px;
+  margin-top: 0.65rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.72rem;
+  background: #ffffff;
+}
+
+.monthLabels {
+  margin-top: 0.45rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+  gap: 0.35rem;
+  color: #64748b;
+  font-size: 0.76rem;
+}
+
+.monthlyTableWrap,
 .tableWrap {
-  margin-top: 1rem;
+  margin-top: 0.85rem;
   overflow: auto;
 }
 
+.monthlyTableWrap table,
 .tableWrap table {
   width: 100%;
-  min-width: 860px;
+  min-width: 740px;
   border-collapse: separate;
   border-spacing: 0;
 }
 
+.monthlyTableWrap th,
+.monthlyTableWrap td,
 .tableWrap th,
 .tableWrap td {
   text-align: left;
-  padding: 0.9rem 1rem;
-  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  padding: 0.74rem 0.82rem;
+  border-bottom: 1px solid #e2e8f0;
 }
 
+.monthlyTableWrap th,
 .tableWrap th {
-  font-size: 0.73rem;
+  font-size: 0.72rem;
   text-transform: uppercase;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.06em;
   color: #64748b;
 }
 
+.monthlyTableWrap td,
 .tableWrap td {
-  font-size: 0.92rem;
+  font-size: 0.88rem;
 }
 
+.monthlyTableWrap tbody tr:nth-child(odd),
 .tableWrap tbody tr:nth-child(odd) {
   background: #f8fafc;
 }
 
-.tableWrap tbody tr:hover {
-  background: #ecfeff;
+.emptyHint {
+  margin-top: 0.7rem;
+  color: #64748b;
 }
 
 .pass {
@@ -363,6 +339,14 @@
 
 .warn {
   color: var(--warn);
+}
+
+.footerNote {
+  border-top: 1px solid rgba(15, 23, 42, 0.12);
+  padding-top: 0.9rem;
+  color: #64748b;
+  font-size: 0.88rem;
+  text-align: right;
 }
 
 .emptyState {
@@ -382,11 +366,119 @@
   color: var(--text-muted);
 }
 
-.footerNote {
-  border-top: 1px solid rgba(15, 23, 42, 0.1);
-  padding-top: 1rem;
-  color: #64748b;
-  font-size: 0.9rem;
+.printReport {
+  display: none;
+}
+
+.printPage {
+  display: grid;
+  min-height: calc(11in - 1.5in);
+  align-content: start;
+}
+
+.printTitleTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.printTitleBody {
+  margin-top: 1.4in;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.printTitleBody h1 {
+  font-size: 34px;
+  line-height: 1.05;
+  font-family: var(--font-heading), "Segoe UI", sans-serif;
+}
+
+.printTitleBody h2 {
+  font-size: 22px;
+}
+
+.printTitleBody p {
+  color: #475569;
+}
+
+.printPageHeading {
+  font-size: 23px;
+  margin-bottom: 0.28in;
+}
+
+.printKpiGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.22in;
+}
+
+.printKpiCard {
+  border: 1px solid #dbe2ea;
+  border-radius: 0.14in;
+  padding: 0.2in;
+  display: grid;
+  gap: 0.06in;
+}
+
+.printKpiCard span {
+  color: #475569;
+  font-size: 11pt;
+}
+
+.printKpiCard strong {
+  font-size: 20pt;
+}
+
+.printAllocationTable table,
+.printDetailTable table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.printAllocationTable th,
+.printAllocationTable td {
+  font-size: 10.5pt;
+  padding: 0.08in 0.07in;
+  border-bottom: 1px solid #dbe2ea;
+}
+
+.printDetailTable th,
+.printDetailTable td {
+  font-size: 10pt;
+  padding: 0.08in 0.07in;
+  border-bottom: 1px solid #dbe2ea;
+}
+
+.printAllocationTable th,
+.printDetailTable th {
+  text-align: left;
+  color: #475569;
+}
+
+.printDetailTable tbody tr:nth-child(odd) {
+  background: #f8fafc;
+}
+
+.printBarTrack {
+  width: 100%;
+  height: 0.14in;
+  border-radius: 0.2in;
+  background: #e2e8f0;
+}
+
+.printBarFill {
+  height: 100%;
+  border-radius: inherit;
+  background: #14b8a6;
+}
+
+.printFooter {
+  margin-top: auto;
+  padding-top: 0.14in;
+  border-top: 1px solid #dbe2ea;
+  color: #475569;
+  font-size: 9.5pt;
   text-align: right;
 }
 
@@ -402,27 +494,22 @@
 }
 
 @media (max-width: 1080px) {
-  .page {
-    padding: 1.6rem 1rem 2rem;
+  .screenOnly {
+    padding: 1.5rem 1rem 2rem;
   }
 
   .heroSection {
-    padding-inline: 1.2rem;
     display: grid;
     justify-items: start;
+    padding: 1.2rem;
   }
 
   .heroMeta {
     justify-items: start;
   }
 
-  .footerNote {
-    text-align: left;
-  }
-
   .controlsSection {
     grid-template-columns: 1fr;
-    padding-inline: 1rem;
   }
 
   .healthField {
@@ -433,46 +520,44 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .chartBody {
-    grid-template-columns: 1fr;
+  .compactRow {
+    grid-template-columns: 1fr auto auto;
   }
 
-  .donut {
-    width: 190px;
-    height: 190px;
-  }
-
-  .donut::after {
-    inset: 30px;
+  .compactBarTrack {
+    grid-column: 1 / -1;
   }
 }
 
-@media (max-width: 660px) {
+@media (max-width: 720px) {
   .metricSection {
     grid-template-columns: 1fr;
+  }
+
+  .footerNote {
+    text-align: left;
   }
 }
 
 @media print {
-  .page {
-    width: 100%;
-    padding: 0;
-    gap: 0.8rem;
+  @page {
+    size: Letter;
+    margin: 0.75in;
   }
 
-  .heroSection,
-  .controlsSection,
-  .metricSection,
-  .chartSection,
-  .tableSection {
-    padding-block: 0.8rem;
-  }
-
-  .exportButton {
+  .screenOnly {
     display: none;
   }
 
-  .tableWrap table {
-    min-width: 0;
+  .printReport {
+    display: block;
+  }
+
+  .printPage {
+    page-break-after: always;
+  }
+
+  .printPage:last-child {
+    page-break-after: auto;
   }
 }

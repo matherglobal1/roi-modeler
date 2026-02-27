@@ -1,4 +1,4 @@
-export type ColumnType = "text" | "currency" | "number";
+export type ColumnType = "text" | "currency" | "number" | "month";
 
 export type UploadTemplateColumn = {
   header: string;
@@ -17,6 +17,13 @@ export const UPLOAD_TEMPLATE_COLUMNS: UploadTemplateColumn[] = [
     example: "Acme Software",
   },
   {
+    header: "Time Period (Month)",
+    required: true,
+    type: "month",
+    description: "Month for this channel row (for example: January 2026).",
+    example: "January 2026",
+  },
+  {
     header: "Channel",
     required: true,
     type: "text",
@@ -24,47 +31,25 @@ export const UPLOAD_TEMPLATE_COLUMNS: UploadTemplateColumn[] = [
     example: "Paid Search",
   },
   {
-    header: "Monthly Budget",
+    header: "Budget",
     required: true,
     type: "currency",
-    description: "Monthly budget allocated to this channel in USD.",
-    example: "$85000",
+    description: "Budget for this channel in the selected month, in USD.",
+    example: "$15000",
   },
   {
-    header: "Projected Pipeline",
+    header: "Expected Pipeline",
     required: true,
     type: "currency",
-    description: "Expected sourced pipeline for this channel.",
-    example: "$31000000",
+    description: "Expected sourced pipeline for this channel and month.",
+    example: "$6200000",
   },
   {
-    header: "Projected Revenue",
+    header: "Expected Revenue",
     required: true,
     type: "currency",
-    description: "Expected sourced revenue for this channel.",
-    example: "$7600000",
-  },
-  {
-    header: "Projected HQLs",
-    required: true,
-    type: "number",
-    description: "Expected number of high-quality leads from this channel.",
-    example: "54000",
-  },
-  {
-    header: "Projected Leads",
-    required: true,
-    type: "number",
-    description: "Expected total leads for this channel.",
-    example: "114000",
-  },
-  {
-    header: "Diminishing Returns Beta (Optional)",
-    required: false,
-    type: "number",
-    description:
-      "Optional curve setting. Leave blank to use the default model value.",
-    example: "0.74",
+    description: "Expected sourced revenue for this channel and month.",
+    example: "$1250000",
   },
 ];
 

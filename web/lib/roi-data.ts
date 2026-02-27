@@ -44,9 +44,17 @@ export type RoiScenario = {
   recommendations: RoiChannelRecommendation[];
 };
 
+export type RoiMonthlyPoint = {
+  month: string;
+  totalSpend: number;
+  totalPipeline: number;
+  totalRevenue: number;
+};
+
 export type RoiClientData = {
   clientId: string;
   displayName?: string;
+  monthlyTrend?: RoiMonthlyPoint[];
   scenarios: RoiScenario[];
 };
 
@@ -66,6 +74,7 @@ type ParsedFileName = {
 type ClientProfile = {
   client_id?: string;
   display_name?: string;
+  monthly_trend?: RoiMonthlyPoint[];
 };
 
 const ROAS_CALIBRATION_FACTOR = 0.5;
@@ -268,6 +277,7 @@ export async function loadRoiSnapshot(): Promise<RoiSnapshot> {
         return {
           clientId,
           displayName: profile?.display_name || prettifyClientId(clientId),
+          monthlyTrend: profile?.monthly_trend || [],
           scenarios: scenarios.sort((a, b) => {
           if (a.timestamp === b.timestamp) {
             return a.objective.localeCompare(b.objective);

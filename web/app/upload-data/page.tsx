@@ -69,6 +69,27 @@ function parseNumber(raw: string): number | null {
   return Number.isFinite(value) ? value : null;
 }
 
+function parseMonth(raw: string): string | null {
+  const value = raw.trim();
+  if (!value) {
+    return null;
+  }
+  const ymMatch = value.match(/^(\d{4})-(\d{2})$/);
+  if (ymMatch) {
+    const month = Number(ymMatch[2]);
+    if (month >= 1 && month <= 12) {
+      return `${ymMatch[1]}-${ymMatch[2]}`;
+    }
+    return null;
+  }
+  const parsed = new Date(`${value} 1`);
+  if (Number.isNaN(parsed.getTime())) {
+    return null;
+  }
+  const month = parsed.getMonth() + 1;
+  return `${parsed.getFullYear()}-${month < 10 ? `0${month}` : month}`;
+}
+
 function normalizeHeader(text: string): string {
   return text.trim();
 }
@@ -162,6 +183,18 @@ function validatePreview(preview: PreviewData): ValidationResult {
             rowIndex,
             colIndex: idx,
             message: `${column.header} must be a number.`,
+          });
+        }
+      }
+
+      if (column.type === "month") {
+        const parsedMonth = parseMonth(value);
+        if (!parsedMonth) {
+          hasIssue = true;
+          cellIssues.push({
+            rowIndex,
+            colIndex: idx,
+            message: `${column.header} must look like 'January 2026' or '2026-01'.`,
           });
         }
       }
@@ -443,7 +476,7 @@ export default function UploadDataPage() {
               </button>
             </div>
             <p>
-              1. Download the template. 2. Fill one row per channel. 3. Keep the column names unchanged. 4. Upload
+              1. Download the template. 2. Enter one row per channel per month. 3. Keep the column names unchanged. 4. Upload
               and run.
             </p>
             <div className={styles.modalImages}>
