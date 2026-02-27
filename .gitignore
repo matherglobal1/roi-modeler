@@ -1,6 +1,11 @@
 .venv/
 __pycache__/
 *.pyc
+node_modules/
+.next/
+web/.next/
+web/node_modules/
+web/.vercel/
 
 # Local and sensitive artifacts
 data/raw/*

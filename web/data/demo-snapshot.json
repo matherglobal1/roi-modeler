@@ -1,0 +1,249 @@
+{
+  "generatedAt": "2026-02-27T00:00:00.000Z",
+  "source": "demo",
+  "clients": [
+    {
+      "clientId": "sample_enterprise",
+      "scenarios": [
+        {
+          "objective": "pipeline",
+          "timestamp": "20260227_000000",
+          "summaryFile": "demo_pipeline_summary.json",
+          "recommendationFile": "demo_pipeline_recommendation.csv",
+          "summary": {
+            "generated_at": "2026-02-27T00:00:00.000Z",
+            "client_id": "sample_enterprise",
+            "objective": "pipeline",
+            "total_budget": 425000,
+            "total_pipeline": 112000000,
+            "total_revenue": 24500000,
+            "total_hqls": 186000,
+            "overall_roas": 57.65,
+            "overall_cac": 2.2849,
+            "guardrail_status": "pass",
+            "unallocated_budget": 0
+          },
+          "recommendations": [
+            {
+              "client_id": "sample_enterprise",
+              "channel": "Paid Search",
+              "recommended_spend": 123250,
+              "recommended_share": 0.29,
+              "pred_pipeline": 31900000,
+              "pred_revenue": 7100000,
+              "pred_hqls": 55400,
+              "pred_leads": 113200,
+              "pred_roas": 57.61,
+              "pred_cac": 2.2247,
+              "min_spend": 54000,
+              "max_spend": 160000
+            },
+            {
+              "client_id": "sample_enterprise",
+              "channel": "Paid Social",
+              "recommended_spend": 89250,
+              "recommended_share": 0.21,
+              "pred_pipeline": 21200000,
+              "pred_revenue": 4625000,
+              "pred_hqls": 33100,
+              "pred_leads": 108500,
+              "pred_roas": 51.82,
+              "pred_cac": 2.6964,
+              "min_spend": 30000,
+              "max_spend": 140000
+            },
+            {
+              "client_id": "sample_enterprise",
+              "channel": "Content Syndication",
+              "recommended_spend": 106250,
+              "recommended_share": 0.25,
+              "pred_pipeline": 41500000,
+              "pred_revenue": 9050000,
+              "pred_hqls": 64200,
+              "pred_leads": 124800,
+              "pred_roas": 85.18,
+              "pred_cac": 1.6548,
+              "min_spend": 50000,
+              "max_spend": 170000
+            },
+            {
+              "client_id": "sample_enterprise",
+              "channel": "Paid Programmatic",
+              "recommended_spend": 46750,
+              "recommended_share": 0.11,
+              "pred_pipeline": 5400000,
+              "pred_revenue": 1265000,
+              "pred_hqls": 14800,
+              "pred_leads": 28600,
+              "pred_roas": 27.06,
+              "pred_cac": 3.1588,
+              "min_spend": 18000,
+              "max_spend": 70000
+            },
+            {
+              "client_id": "sample_enterprise",
+              "channel": "Paid Review Site",
+              "recommended_spend": 25500,
+              "recommended_share": 0.06,
+              "pred_pipeline": 6700000,
+              "pred_revenue": 1460000,
+              "pred_hqls": 11200,
+              "pred_leads": 22100,
+              "pred_roas": 57.25,
+              "pred_cac": 2.2768,
+              "min_spend": 9000,
+              "max_spend": 52000
+            },
+            {
+              "client_id": "sample_enterprise",
+              "channel": "Paid Video",
+              "recommended_spend": 17000,
+              "recommended_share": 0.04,
+              "pred_pipeline": 5300000,
+              "pred_revenue": 1000000,
+              "pred_hqls": 7300,
+              "pred_leads": 14200,
+              "pred_roas": 58.82,
+              "pred_cac": 2.3288,
+              "min_spend": 7000,
+              "max_spend": 40000
+            },
+            {
+              "client_id": "sample_enterprise",
+              "channel": "Paid Display",
+              "recommended_spend": 17000,
+              "recommended_share": 0.04,
+              "pred_pipeline": 4500000,
+              "pred_revenue": 1000000,
+              "pred_hqls": 6100,
+              "pred_leads": 13100,
+              "pred_roas": 58.82,
+              "pred_cac": 2.7869,
+              "min_spend": 7000,
+              "max_spend": 40000
+            }
+          ]
+        },
+        {
+          "objective": "revenue",
+          "timestamp": "20260227_000000",
+          "summaryFile": "demo_revenue_summary.json",
+          "recommendationFile": "demo_revenue_recommendation.csv",
+          "summary": {
+            "generated_at": "2026-02-27T00:00:00.000Z",
+            "client_id": "sample_enterprise",
+            "objective": "revenue",
+            "total_budget": 425000,
+            "total_pipeline": 107500000,
+            "total_revenue": 25800000,
+            "total_hqls": 172000,
+            "overall_roas": 60.71,
+            "overall_cac": 2.4709,
+            "guardrail_status": "pass",
+            "unallocated_budget": 0
+          },
+          "recommendations": [
+            {
+              "client_id": "sample_enterprise",
+              "channel": "Paid Search",
+              "recommended_spend": 131750,
+              "recommended_share": 0.31,
+              "pred_pipeline": 30400000,
+              "pred_revenue": 7815000,
+              "pred_hqls": 54800,
+              "pred_leads": 112000,
+              "pred_roas": 59.32,
+              "pred_cac": 2.4042,
+              "min_spend": 54000,
+              "max_spend": 170000
+            },
+            {
+              "client_id": "sample_enterprise",
+              "channel": "Content Syndication",
+              "recommended_spend": 114750,
+              "recommended_share": 0.27,
+              "pred_pipeline": 39600000,
+              "pred_revenue": 9475000,
+              "pred_hqls": 61100,
+              "pred_leads": 119000,
+              "pred_roas": 82.57,
+              "pred_cac": 1.8781,
+              "min_spend": 50000,
+              "max_spend": 175000
+            },
+            {
+              "client_id": "sample_enterprise",
+              "channel": "Paid Social",
+              "recommended_spend": 76500,
+              "recommended_share": 0.18,
+              "pred_pipeline": 17900000,
+              "pred_revenue": 4180000,
+              "pred_hqls": 28500,
+              "pred_leads": 94700,
+              "pred_roas": 54.64,
+              "pred_cac": 2.6842,
+              "min_spend": 30000,
+              "max_spend": 140000
+            },
+            {
+              "client_id": "sample_enterprise",
+              "channel": "Paid Review Site",
+              "recommended_spend": 34000,
+              "recommended_share": 0.08,
+              "pred_pipeline": 7100000,
+              "pred_revenue": 1640000,
+              "pred_hqls": 12400,
+              "pred_leads": 24800,
+              "pred_roas": 48.24,
+              "pred_cac": 2.7419,
+              "min_spend": 9000,
+              "max_spend": 52000
+            },
+            {
+              "client_id": "sample_enterprise",
+              "channel": "Paid Programmatic",
+              "recommended_spend": 34000,
+              "recommended_share": 0.08,
+              "pred_pipeline": 5400000,
+              "pred_revenue": 1360000,
+              "pred_hqls": 11100,
+              "pred_leads": 23400,
+              "pred_roas": 40,
+              "pred_cac": 3.0631,
+              "min_spend": 18000,
+              "max_spend": 70000
+            },
+            {
+              "client_id": "sample_enterprise",
+              "channel": "Paid Video",
+              "recommended_spend": 17000,
+              "recommended_share": 0.04,
+              "pred_pipeline": 4500000,
+              "pred_revenue": 1110000,
+              "pred_hqls": 8100,
+              "pred_leads": 15100,
+              "pred_roas": 65.29,
+              "pred_cac": 2.0988,
+              "min_spend": 7000,
+              "max_spend": 40000
+            },
+            {
+              "client_id": "sample_enterprise",
+              "channel": "Paid Display",
+              "recommended_spend": 17000,
+              "recommended_share": 0.04,
+              "pred_pipeline": 3600000,
+              "pred_revenue": 1050000,
+              "pred_hqls": 6000,
+              "pred_leads": 13000,
+              "pred_roas": 61.76,
+              "pred_cac": 2.8333,
+              "min_spend": 7000,
+              "max_spend": 40000
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

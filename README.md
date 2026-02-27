@@ -13,6 +13,7 @@ Dynamic, client-agnostic ROI optimizer built from a real client workbook, with r
 
 - `src/roi_modeler/`: core ingestion, optimization, and sample generation logic.
 - `scripts/`: CLI wrappers for ingestion, optimization, and bootstrap runs.
+- `web/`: Next.js dashboard for visualizing optimization outputs and deploying to Vercel.
 - `configs/objectives.yaml`: objective weights you can tune.
 - `configs/clients/*.yaml`: per-client data paths and run defaults.
 - `data/canonical/`: client canonical outputs.
@@ -56,6 +57,34 @@ Edit `data/canonical/<client>_constraints.csv`:
 - `min_roas`, `max_cac`: guardrail thresholds.
 
 Then rerun optimizer.
+
+## Dashboard (Next.js)
+
+The frontend lives in `web/` and reads the latest optimizer outputs from:
+
+- `data/canonical/outputs/*_summary_*.json`
+- `data/canonical/outputs/*_recommendation_*.csv`
+
+If no local outputs exist, it falls back to `web/data/demo-snapshot.json`.
+
+Run locally:
+
+```powershell
+cd C:\Users\WillMather\Documents\JG\Projects\apps-internal\roi-modeler\web
+npm install
+npm run dev
+```
+
+API endpoint exposed by the UI app:
+
+- `GET /api/roi/latest`
+
+## Deploy To Vercel
+
+1. Import `matherglobal1/roi-modeler` in Vercel.
+2. Set the Vercel project Root Directory to `web`.
+3. Keep build defaults (`npm run build`, output handled by Next.js).
+4. Deploy.
 
 ## Notes
 
