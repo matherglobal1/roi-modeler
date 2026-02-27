@@ -4,8 +4,10 @@ import path from "node:path";
 import { promisify } from "node:util";
 
 import { NextResponse } from "next/server";
+import * as XLSX from "xlsx";
 
 import { loadRoiSnapshot } from "@/lib/roi-data";
+import { REQUIRED_TEMPLATE_HEADERS } from "@/lib/upload-template";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -13,7 +15,10 @@ export const dynamic = "force-dynamic";
 const execFileAsync = promisify(execFile);
 const OBJECTIVES = ["pipeline", "revenue", "roas", "cac"];
 
-type CsvRow = Record<string, string>;
+type TabularUpload = {
+  headers: string[];
+  rows: string[][];
+};
 
 function slugify(value: string): string {
   return value
@@ -49,83 +54,247 @@ function parseCsvLine(line: string): string[] {
   return cells;
 }
 
-function parseCsv(text: string): CsvRow[] {
-  const lines = text
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean);
-  if (lines.length < 2) {
-    return [];
+function normalizeHeader(text: string): string {
+  return text.trim();
+}
+
+async function readTabularUpload(filePath: string, ext: string): Promise<TabularUpload> {
+  if (ext === ".csv") {
+    const raw = await fs.readFile(filePath, "utf8");
+    const lines = raw
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+    if (!lines.length) {
+      return { headers: [], rows: [] };
+    }
+    return {
+      headers: parseCsvLine(lines[0]).map(normalizeHeader),
+      rows: lines.slice(1).map((line) => parseCsvLine(line)),
+    };
   }
-  const headers = parseCsvLine(lines[0]);
-  return lines.slice(1).map((line) => {
-    const values = parseCsvLine(line);
-    const row: CsvRow = {};
-    headers.forEach((header, index) => {
-      row[header] = values[index] ?? "";
-    });
-    return row;
+
+  const workbook = XLSX.readFile(filePath);
+  const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json<(string | number | boolean | null)[]>(firstSheet, {
+    header: 1,
+    blankrows: false,
   });
-}
-
-function parseNumber(raw: string | undefined, fallback = 0): number {
-  if (!raw) {
-    return fallback;
+  if (!rows.length) {
+    return { headers: [], rows: [] };
   }
-  const cleaned = raw.replace(/[$,%\s,]/g, "");
-  const num = Number(cleaned);
-  return Number.isFinite(num) ? num : fallback;
+  const headers = (rows[0] ?? []).map((value) => normalizeHeader(String(value ?? "")));
+  const values = rows.slice(1).map((row) => headers.map((_, index) => String(row[index] ?? "")));
+  return { headers, rows: values };
 }
 
-function csvStringify(rows: Array<Record<string, string | number | boolean | null>>): string {
+function toNumber(raw: string, fieldName: string, rowNumber: number): number {
+  const cleaned = raw.replace(/[$,\s]/g, "");
+  const parsed = Number(cleaned);
+  if (!Number.isFinite(parsed)) {
+    throw new Error(`${fieldName} must be numeric on row ${rowNumber}.`);
+  }
+  return parsed;
+}
+
+type CanonicalPayload = {
+  baselineRows: Array<Record<string, string | number>>;
+  constraintsRows: Array<Record<string, string | number | boolean>>;
+  performanceRows: Array<Record<string, string | number>>;
+  totalBudget: number;
+  displayName: string;
+};
+
+function buildCanonicalFromTemplate(upload: TabularUpload, clientId: string): CanonicalPayload {
+  const headerIndex = new Map<string, number>();
+  upload.headers.forEach((header, idx) => {
+    headerIndex.set(normalizeHeader(header), idx);
+  });
+
+  const missingHeaders = REQUIRED_TEMPLATE_HEADERS.filter(
+    (required) => !headerIndex.has(normalizeHeader(required)),
+  );
+  if (missingHeaders.length > 0) {
+    throw new Error(
+      `Missing column: ${missingHeaders[0]}. Download the template to see the required format.`,
+    );
+  }
+
+  const getValue = (row: string[], header: string): string => {
+    const idx = headerIndex.get(normalizeHeader(header));
+    return idx === undefined ? "" : String(row[idx] ?? "").trim();
+  };
+
+  const entries: Array<{
+    channel: string;
+    spend: number;
+    pipeline: number;
+    revenue: number;
+    hqls: number;
+    leads: number;
+    beta: number;
+  }> = [];
+  let displayName = "";
+
+  upload.rows.forEach((row, index) => {
+    const rowNumber = index + 2;
+    const clientName = getValue(row, "Client Name");
+    const channel = getValue(row, "Channel");
+    const spendRaw = getValue(row, "Monthly Budget");
+    const pipelineRaw = getValue(row, "Projected Pipeline");
+    const revenueRaw = getValue(row, "Projected Revenue");
+    const hqlRaw = getValue(row, "Projected HQLs");
+    const leadsRaw = getValue(row, "Projected Leads");
+    const betaRaw = getValue(row, "Diminishing Returns Beta (Optional)");
+
+    const allBlank = [clientName, channel, spendRaw, pipelineRaw, revenueRaw, hqlRaw, leadsRaw].every(
+      (value) => value.length === 0,
+    );
+    if (allBlank) {
+      return;
+    }
+
+    if (!clientName || !channel || !spendRaw || !pipelineRaw || !revenueRaw || !hqlRaw || !leadsRaw) {
+      throw new Error(`All required fields must be filled on row ${rowNumber}.`);
+    }
+
+    if (!displayName) {
+      displayName = clientName;
+    }
+
+    const spend = toNumber(spendRaw, "Monthly Budget", rowNumber);
+    const pipeline = toNumber(pipelineRaw, "Projected Pipeline", rowNumber);
+    const revenue = toNumber(revenueRaw, "Projected Revenue", rowNumber);
+    const hqls = toNumber(hqlRaw, "Projected HQLs", rowNumber);
+    const leads = toNumber(leadsRaw, "Projected Leads", rowNumber);
+    const beta = betaRaw ? toNumber(betaRaw, "Diminishing Returns Beta (Optional)", rowNumber) : 0.72;
+
+    if (spend <= 0) {
+      throw new Error(`Monthly Budget must be greater than zero on row ${rowNumber}.`);
+    }
+
+    entries.push({
+      channel,
+      spend,
+      pipeline,
+      revenue,
+      hqls,
+      leads,
+      beta,
+    });
+  });
+
+  if (!entries.length) {
+    throw new Error("No channel rows found. Add at least one channel row to the template.");
+  }
+
+  const totalBudget = entries.reduce((sum, item) => sum + item.spend, 0);
+  const now = new Date().toISOString();
+
+  const baselineRows = entries.map((item) => {
+    const alphaPipeline = item.pipeline / item.spend ** item.beta;
+    const alphaRevenue = item.revenue / item.spend ** item.beta;
+    const alphaHql = item.hqls / item.spend ** item.beta;
+    const alphaLeads = item.leads / item.spend ** item.beta;
+    return {
+      client_id: clientId,
+      channel: item.channel,
+      baseline_spend: Number(item.spend.toFixed(2)),
+      baseline_share: Number((item.spend / totalBudget).toFixed(6)),
+      engaged_leads: Number(item.leads.toFixed(2)),
+      hqls: Number(item.hqls.toFixed(2)),
+      opps_sourced: Number((item.hqls * 0.18).toFixed(2)),
+      pipeline_sourced: Number(item.pipeline.toFixed(2)),
+      cw_acv_sourced: Number(item.revenue.toFixed(2)),
+      roas_baseline: Number((item.revenue / item.spend).toFixed(4)),
+      cac_baseline: Number((item.spend / Math.max(1, item.hqls)).toFixed(4)),
+      beta: Number(item.beta.toFixed(4)),
+      alpha_pipeline: Number(alphaPipeline.toFixed(6)),
+      alpha_revenue: Number(alphaRevenue.toFixed(6)),
+      alpha_hqls: Number(alphaHql.toFixed(6)),
+      alpha_leads: Number(alphaLeads.toFixed(6)),
+      notes: "Generated from upload template.",
+    };
+  });
+
+  const constraintsRows = baselineRows.map((row) => {
+    const minSpend = Number((Number(row.baseline_spend) * 0.4).toFixed(2));
+    const rawMax = Math.max(Number(row.baseline_spend) * 1.8, totalBudget * 0.1);
+    const maxSpend = Number(Math.min(rawMax, totalBudget * 0.75).toFixed(2));
+    return {
+      client_id: clientId,
+      channel: row.channel,
+      enabled: true,
+      min_spend: minSpend,
+      max_spend: maxSpend,
+      locked_spend: "",
+      min_share: Number((minSpend / totalBudget).toFixed(6)),
+      max_share: Number((maxSpend / totalBudget).toFixed(6)),
+      min_roas: Number((Number(row.roas_baseline) * 0.7).toFixed(4)),
+      max_cac: Number((Number(row.cac_baseline) * 1.4).toFixed(4)),
+      notes: "Auto-generated hard caps.",
+    };
+  });
+
+  const performanceRows = baselineRows.map((row) => ({
+    client_id: clientId,
+    geo: "Global",
+    channel: row.channel,
+    sub_channel: row.channel,
+    platform: "Template Upload",
+    fiscal_year: new Date().getFullYear(),
+    fiscal_quarter: "Q1",
+    quarter_label: "Q1",
+    period_start: `${new Date().getFullYear()}-01-01`,
+    engaged_leads: row.engaged_leads,
+    hqls: row.hqls,
+    opps_sourced: row.opps_sourced,
+    pipeline_sourced: row.pipeline_sourced,
+    pipeline_influenced: row.pipeline_sourced,
+    cw_opps_sourced: row.opps_sourced,
+    cw_acv_sourced: row.cw_acv_sourced,
+    cw_acv_influenced: row.cw_acv_sourced,
+    hql_to_opp_conversion:
+      Number(row.hqls) > 0 ? Number((Number(row.opps_sourced) / Number(row.hqls)).toFixed(4)) : 0,
+    source_file: "upload_template",
+    ingested_at: now,
+  }));
+
+  return {
+    baselineRows,
+    constraintsRows,
+    performanceRows,
+    totalBudget,
+    displayName: displayName || clientId.replaceAll("_", " "),
+  };
+}
+
+function csvStringify(rows: Array<Record<string, string | number | boolean>>): string {
   if (!rows.length) {
     return "";
   }
   const headers = Object.keys(rows[0]);
   const escape = (value: unknown): string => {
-    if (value === null || value === undefined) {
-      return "";
-    }
-    const text = String(value);
+    const text = String(value ?? "");
     if (text.includes(",") || text.includes('"') || text.includes("\n")) {
       return `"${text.replaceAll('"', '""')}"`;
     }
     return text;
   };
-  return [
-    headers.join(","),
-    ...rows.map((row) => headers.map((header) => escape(row[header])).join(",")),
-  ].join("\n");
+  return [headers.join(","), ...rows.map((row) => headers.map((h) => escape(row[h])).join(","))].join("\n");
 }
 
-async function runPythonScript(repoRoot: string, scriptPath: string, args: string[]): Promise<void> {
-  const attempts: Array<{ command: string; args: string[] }> = [
-    { command: process.env.PYTHON_BIN || "python", args: [scriptPath, ...args] },
-  ];
-  if (process.platform === "win32") {
-    attempts.push({ command: "py", args: ["-3", scriptPath, ...args] });
-  }
-
-  let lastError: unknown;
-  for (const attempt of attempts) {
-    try {
-      await execFileAsync(attempt.command, attempt.args, {
-        cwd: repoRoot,
-        windowsHide: true,
-      });
-      return;
-    } catch (error) {
-      lastError = error;
-    }
-  }
-  throw lastError;
+async function writeCanonicalFiles(repoRoot: string, clientId: string, payload: CanonicalPayload): Promise<void> {
+  const dataDir = path.join(repoRoot, "data", "canonical");
+  await fs.mkdir(dataDir, { recursive: true });
+  await Promise.all([
+    fs.writeFile(path.join(dataDir, `${clientId}_channel_baseline.csv`), csvStringify(payload.baselineRows), "utf8"),
+    fs.writeFile(path.join(dataDir, `${clientId}_constraints.csv`), csvStringify(payload.constraintsRows), "utf8"),
+    fs.writeFile(path.join(dataDir, `${clientId}_performance.csv`), csvStringify(payload.performanceRows), "utf8"),
+  ]);
 }
 
-async function ensureClientConfig(
-  repoRoot: string,
-  clientId: string,
-  totalBudget: number,
-): Promise<void> {
+async function ensureClientConfig(repoRoot: string, clientId: string, totalBudget: number): Promise<void> {
   const configPath = path.join(repoRoot, "configs", "clients", `${clientId}.yaml`);
   const payload = `client_id: ${clientId}
 description: Uploaded dataset for ${clientId}.
@@ -155,155 +324,27 @@ async function writeClientProfile(repoRoot: string, clientId: string, displayNam
   await fs.writeFile(profilePath, JSON.stringify(payload, null, 2), "utf8");
 }
 
-function pickFirst(row: CsvRow, keys: string[]): string | undefined {
-  for (const key of keys) {
-    const direct = row[key];
-    if (direct !== undefined && String(direct).trim().length > 0) {
-      return direct;
-    }
-    const lower = row[key.toLowerCase()];
-    if (lower !== undefined && String(lower).trim().length > 0) {
-      return lower;
+async function runPythonScript(repoRoot: string, args: string[]): Promise<void> {
+  const attempts: Array<{ command: string; commandArgs: string[] }> = [
+    { command: process.env.PYTHON_BIN || "python", commandArgs: ["scripts/run_optimizer.py", ...args] },
+  ];
+  if (process.platform === "win32") {
+    attempts.push({ command: "py", commandArgs: ["-3", "scripts/run_optimizer.py", ...args] });
+  }
+
+  let lastError: unknown;
+  for (const attempt of attempts) {
+    try {
+      await execFileAsync(attempt.command, attempt.commandArgs, {
+        cwd: repoRoot,
+        windowsHide: true,
+      });
+      return;
+    } catch (error) {
+      lastError = error;
     }
   }
-  return undefined;
-}
-
-function buildCanonicalFromCsv(rows: CsvRow[], clientId: string) {
-  const normalizedRows = rows
-    .map((row) => {
-      const channel = pickFirst(row, ["channel", "Channel", "name", "Name"]);
-      const spend = parseNumber(
-        pickFirst(row, ["baseline_spend", "recommended_spend", "spend", "budget", "Budget"]),
-        0,
-      );
-      if (!channel || spend <= 0) {
-        return null;
-      }
-      const beta = parseNumber(pickFirst(row, ["beta", "Beta"]), 0.72);
-      const pipeline = parseNumber(
-        pickFirst(row, ["pipeline_sourced", "pipeline", "pred_pipeline"]),
-        spend * 320,
-      );
-      const revenue = parseNumber(
-        pickFirst(row, ["cw_acv_sourced", "revenue", "pred_revenue"]),
-        spend * 95,
-      );
-      const hqls = parseNumber(pickFirst(row, ["hqls", "pred_hqls"]), Math.max(1, spend / 2.1));
-      const leads = parseNumber(pickFirst(row, ["engaged_leads", "pred_leads", "leads"]), hqls * 2.1);
-      const alphaPipeline = parseNumber(pickFirst(row, ["alpha_pipeline"]), pipeline / spend ** beta);
-      const alphaRevenue = parseNumber(pickFirst(row, ["alpha_revenue"]), revenue / spend ** beta);
-      const alphaHqls = parseNumber(pickFirst(row, ["alpha_hqls"]), hqls / spend ** beta);
-      const alphaLeads = parseNumber(pickFirst(row, ["alpha_leads"]), leads / spend ** beta);
-
-      return {
-        channel: channel.trim(),
-        baseline_spend: spend,
-        beta,
-        pipeline_sourced: pipeline,
-        cw_acv_sourced: revenue,
-        hqls,
-        engaged_leads: leads,
-        opps_sourced: parseNumber(pickFirst(row, ["opps_sourced"]), Math.max(1, hqls * 0.18)),
-        alpha_pipeline: alphaPipeline,
-        alpha_revenue: alphaRevenue,
-        alpha_hqls: alphaHqls,
-        alpha_leads: alphaLeads,
-      };
-    })
-    .filter((row): row is NonNullable<typeof row> => Boolean(row));
-
-  const totalBudget = normalizedRows.reduce((sum, row) => sum + row.baseline_spend, 0);
-  const baselineRows = normalizedRows.map((row) => ({
-    client_id: clientId,
-    channel: row.channel,
-    baseline_spend: Number(row.baseline_spend.toFixed(2)),
-    baseline_share: totalBudget > 0 ? Number((row.baseline_spend / totalBudget).toFixed(6)) : 0,
-    engaged_leads: Number(row.engaged_leads.toFixed(2)),
-    hqls: Number(row.hqls.toFixed(2)),
-    opps_sourced: Number(row.opps_sourced.toFixed(2)),
-    pipeline_sourced: Number(row.pipeline_sourced.toFixed(2)),
-    cw_acv_sourced: Number(row.cw_acv_sourced.toFixed(2)),
-    roas_baseline: Number((row.cw_acv_sourced / Math.max(1, row.baseline_spend)).toFixed(4)),
-    cac_baseline: Number((row.baseline_spend / Math.max(1, row.hqls)).toFixed(4)),
-    beta: Number(row.beta.toFixed(4)),
-    alpha_pipeline: Number(row.alpha_pipeline.toFixed(6)),
-    alpha_revenue: Number(row.alpha_revenue.toFixed(6)),
-    alpha_hqls: Number(row.alpha_hqls.toFixed(6)),
-    alpha_leads: Number(row.alpha_leads.toFixed(6)),
-    notes: "Generated from uploaded CSV.",
-  }));
-
-  const constraintsRows = baselineRows.map((row) => {
-    const minSpend = row.baseline_spend * 0.4;
-    const rawMax = Math.max(row.baseline_spend * 1.8, totalBudget * 0.1);
-    const maxSpend = Math.min(rawMax, totalBudget * 0.75);
-    return {
-      client_id: clientId,
-      channel: row.channel,
-      enabled: true,
-      min_spend: Number(minSpend.toFixed(2)),
-      max_spend: Number(maxSpend.toFixed(2)),
-      locked_spend: "",
-      min_share: totalBudget > 0 ? Number((minSpend / totalBudget).toFixed(6)) : "",
-      max_share: totalBudget > 0 ? Number((maxSpend / totalBudget).toFixed(6)) : "",
-      min_roas: Number((row.roas_baseline * 0.7).toFixed(4)),
-      max_cac: Number((row.cac_baseline * 1.4).toFixed(4)),
-      notes: "Auto-generated hard caps.",
-    };
-  });
-
-  const now = new Date().toISOString();
-  const performanceRows = baselineRows.map((row) => ({
-    client_id: clientId,
-    geo: "Global",
-    channel: row.channel,
-    sub_channel: row.channel,
-    platform: "Uploaded CSV",
-    fiscal_year: new Date().getFullYear(),
-    fiscal_quarter: "Q1",
-    quarter_label: "Q1",
-    period_start: `${new Date().getFullYear()}-01-01`,
-    engaged_leads: row.engaged_leads,
-    hqls: row.hqls,
-    opps_sourced: row.opps_sourced,
-    pipeline_sourced: row.pipeline_sourced,
-    pipeline_influenced: row.pipeline_sourced,
-    cw_opps_sourced: row.opps_sourced,
-    cw_acv_sourced: row.cw_acv_sourced,
-    cw_acv_influenced: row.cw_acv_sourced,
-    hql_to_opp_conversion: row.hqls > 0 ? Number((row.opps_sourced / row.hqls).toFixed(4)) : 0,
-    source_file: "uploaded.csv",
-    ingested_at: now,
-  }));
-
-  return { baselineRows, constraintsRows, performanceRows, totalBudget };
-}
-
-async function writeCsvCanonicalFiles(
-  repoRoot: string,
-  clientId: string,
-  payload: ReturnType<typeof buildCanonicalFromCsv>,
-): Promise<void> {
-  const dataDir = path.join(repoRoot, "data", "canonical");
-  await fs.mkdir(dataDir, { recursive: true });
-  await Promise.all([
-    fs.writeFile(
-      path.join(dataDir, `${clientId}_channel_baseline.csv`),
-      csvStringify(payload.baselineRows),
-      "utf8",
-    ),
-    fs.writeFile(
-      path.join(dataDir, `${clientId}_constraints.csv`),
-      csvStringify(payload.constraintsRows),
-      "utf8",
-    ),
-    fs.writeFile(
-      path.join(dataDir, `${clientId}_performance.csv`),
-      csvStringify(payload.performanceRows),
-      "utf8",
-    ),
-  ]);
+  throw lastError;
 }
 
 export async function POST(req: Request) {
@@ -326,50 +367,20 @@ export async function POST(req: Request) {
 
   const base = slugify(clientLabel || path.basename(file.name, ext) || "uploaded_client");
   const clientId = `${base}_${Date.now().toString().slice(-6)}`;
-  const displayName = (clientLabel || labelFromClientId(base)).trim() || "Uploaded Client";
   const tempPath = path.join(uploadsDir, `${clientId}${ext}`);
   await fs.writeFile(tempPath, Buffer.from(await file.arrayBuffer()));
 
   try {
-    let totalBudget = 0;
+    const uploadData = await readTabularUpload(tempPath, ext);
+    const canonical = buildCanonicalFromTemplate(uploadData, clientId);
+    const displayName = clientLabel.trim() || canonical.displayName;
 
-    if (ext === ".xlsx") {
-      await runPythonScript(repoRoot, "scripts/ingest_excel.py", [
-        "--workbook",
-        tempPath,
-        "--client",
-        clientId,
-        "--output-dir",
-        "data/canonical",
-      ]);
-
-      const metadataPath = path.join(repoRoot, "data", "canonical", `${clientId}_ingestion_metadata.json`);
-      const metadataRaw = await fs.readFile(metadataPath, "utf8");
-      const metadata = JSON.parse(metadataRaw) as { modeled_total_budget?: number };
-      totalBudget = Number(metadata.modeled_total_budget ?? 0);
-    } else {
-      const csvRaw = await fs.readFile(tempPath, "utf8");
-      const parsed = parseCsv(csvRaw);
-      const canonical = buildCanonicalFromCsv(parsed, clientId);
-      if (!canonical.baselineRows.length) {
-        return NextResponse.json(
-          {
-            error:
-              "CSV must include at least `channel` and one spend column (`baseline_spend`, `recommended_spend`, or `spend`).",
-          },
-          { status: 400 },
-        );
-      }
-      totalBudget = canonical.totalBudget;
-      await writeCsvCanonicalFiles(repoRoot, clientId, canonical);
-    }
-
-    const effectiveBudget = totalBudget > 0 ? totalBudget : 100000;
-    await ensureClientConfig(repoRoot, clientId, effectiveBudget);
+    await writeCanonicalFiles(repoRoot, clientId, canonical);
+    await ensureClientConfig(repoRoot, clientId, canonical.totalBudget || 100000);
     await writeClientProfile(repoRoot, clientId, displayName);
 
     for (const objective of OBJECTIVES) {
-      await runPythonScript(repoRoot, "scripts/run_optimizer.py", [
+      await runPythonScript(repoRoot, [
         "--client",
         clientId,
         "--objective",
@@ -391,19 +402,17 @@ export async function POST(req: Request) {
       { headers: { "Cache-Control": "no-store" } },
     );
   } catch (error) {
+    const message = error instanceof Error ? error.message : "Optimizer run failed.";
+    const status = message.startsWith("Missing column:") ? 400 : 500;
     const fallback = await loadRoiSnapshot();
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : "Optimizer run failed.",
+        error: message,
         source: "demo",
         snapshot: fallback,
       },
-      { status: 500 },
+      { status },
     );
   }
-}
-
-function labelFromClientId(clientId: string): string {
-  return clientId.replaceAll("_", " ").trim();
 }

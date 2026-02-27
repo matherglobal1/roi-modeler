@@ -25,10 +25,11 @@ API route:
 
 - `GET /api/roi/latest`
 - `POST /api/roi/run`
+- `GET /api/roi/template`
 
 Upload route:
 
-- `GET /upload-data` for drag-drop upload, preview, and one-click model run.
+- `GET /upload-data` for 3-step flow: download template, upload file, review and run.
 
 ## Vercel
 

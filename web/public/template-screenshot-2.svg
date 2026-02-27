@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" fill="none">
+  <rect width="1200" height="360" fill="#F8FAFC"/>
+  <rect x="36" y="28" width="1128" height="304" rx="14" fill="white" stroke="#CBD5E1"/>
+  <text x="58" y="62" fill="#0F172A" font-family="Arial, sans-serif" font-size="22" font-weight="700">Template: Correctly Filled Row</text>
+  <rect x="58" y="82" width="1084" height="40" rx="8" fill="#EFF6FF" stroke="#BFDBFE"/>
+  <text x="72" y="107" fill="#1E3A8A" font-family="Arial, sans-serif" font-size="14" font-weight="700">Client Name</text>
+  <text x="214" y="107" fill="#1E3A8A" font-family="Arial, sans-serif" font-size="14" font-weight="700">Channel</text>
+  <text x="316" y="107" fill="#1E3A8A" font-family="Arial, sans-serif" font-size="14" font-weight="700">Monthly Budget</text>
+  <text x="490" y="107" fill="#1E3A8A" font-family="Arial, sans-serif" font-size="14" font-weight="700">Projected Pipeline</text>
+  <text x="700" y="107" fill="#1E3A8A" font-family="Arial, sans-serif" font-size="14" font-weight="700">Projected Revenue</text>
+  <text x="898" y="107" fill="#1E3A8A" font-family="Arial, sans-serif" font-size="14" font-weight="700">Projected HQLs</text>
+  <text x="1048" y="107" fill="#1E3A8A" font-family="Arial, sans-serif" font-size="14" font-weight="700">Projected Leads</text>
+  <rect x="58" y="122" width="1084" height="44" rx="8" fill="#DCFCE7" stroke="#22C55E"/>
+  <text x="72" y="149" fill="#166534" font-family="Arial, sans-serif" font-size="15">Acme Software</text>
+  <text x="214" y="149" fill="#166534" font-family="Arial, sans-serif" font-size="15">Paid Search</text>
+  <text x="316" y="149" fill="#166534" font-family="Arial, sans-serif" font-size="15">$85000</text>
+  <text x="490" y="149" fill="#166534" font-family="Arial, sans-serif" font-size="15">$31000000</text>
+  <text x="700" y="149" fill="#166534" font-family="Arial, sans-serif" font-size="15">$7600000</text>
+  <text x="898" y="149" fill="#166534" font-family="Arial, sans-serif" font-size="15">54000</text>
+  <text x="1048" y="149" fill="#166534" font-family="Arial, sans-serif" font-size="15">114000</text>
+  <rect x="58" y="188" width="1084" height="104" rx="8" fill="#F8FAFC" stroke="#E2E8F0"/>
+  <text x="72" y="218" fill="#475569" font-family="Arial, sans-serif" font-size="15">Numbers can include commas or dollar signs.</text>
+  <text x="72" y="246" fill="#475569" font-family="Arial, sans-serif" font-size="15">If a numeric column has text, upload validation highlights that cell in red.</text>
+  <text x="72" y="274" fill="#0F766E" font-family="Arial, sans-serif" font-size="14" font-weight="700">✓ This row format will validate successfully.</text>
+</svg>

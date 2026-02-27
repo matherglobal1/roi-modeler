@@ -1,42 +1,78 @@
 .page {
-  width: min(1080px, 100%);
+  width: min(1120px, 100%);
   margin: 0 auto;
   padding: 2rem;
   display: grid;
-  gap: 1.5rem;
+  gap: 1.25rem;
 }
 
-.header h1 {
-  margin-top: 0.25rem;
+.stepCard {
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  border-radius: 1rem;
+  background: #ffffff;
+  padding: 1.25rem;
+  display: grid;
+  gap: 0.8rem;
+}
+
+.stepCard h2 {
   font-family: var(--font-heading), "Segoe UI", sans-serif;
-  font-size: clamp(2rem, 4.5vw, 3rem);
+  font-size: 1.5rem;
 }
 
-.kicker {
-  font-size: 0.76rem;
-  text-transform: uppercase;
+.stepCard p {
+  color: #475569;
+}
+
+.stepHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.helpLink {
+  border: none;
+  background: transparent;
   color: #0f766e;
-  letter-spacing: 0.08em;
+  text-decoration: underline;
+  cursor: pointer;
   font-weight: 600;
 }
 
-.header p {
-  margin-top: 0.7rem;
-  color: #475569;
+.primaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #14b8a6;
+  background: #14b8a6;
+  color: #ffffff;
+  border-radius: 0.65rem;
+  min-height: 2.55rem;
+  padding: 0.55rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  width: fit-content;
+  text-decoration: none;
+}
+
+.primaryButton:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .dropzone {
   border: 2px dashed #cbd5e1;
   border-radius: 1rem;
   background: #f8fafc;
-  padding: 2.2rem;
+  padding: 2rem;
   text-align: center;
   display: grid;
   gap: 0.55rem;
 }
 
-.dropzone h2 {
-  font-size: 1.2rem;
+.dropzone h3 {
+  font-size: 1.1rem;
 }
 
 .dropzone p {
@@ -63,64 +99,87 @@
   display: none;
 }
 
-.card {
-  border: 1px solid rgba(15, 23, 42, 0.1);
-  border-radius: 1rem;
-  background: #ffffff;
-  padding: 1rem;
-}
-
-.row {
+.clientRow {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 1rem;
   align-items: end;
 }
 
-.row label {
+.clientRow label {
   display: grid;
   gap: 0.45rem;
 }
 
-.row label span {
+.clientRow label span {
   font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: #64748b;
 }
 
-.row input {
+.clientRow input {
   border: 1px solid #cbd5e1;
-  border-radius: 0.55rem;
-  min-height: 2.6rem;
-  padding: 0.55rem 0.75rem;
+  border-radius: 0.6rem;
+  min-height: 2.7rem;
+  padding: 0.6rem 0.75rem;
   font-size: 0.95rem;
 }
 
-.row button {
-  border: 1px solid #14b8a6;
-  background: #14b8a6;
-  color: #ffffff;
-  border-radius: 0.6rem;
-  min-height: 2.6rem;
-  padding: 0.55rem 1rem;
-  font-weight: 600;
-  cursor: pointer;
+.columnChecks {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
 }
 
-.row button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.columnChecks li {
+  border: 1px solid #e2e8f0;
+  border-radius: 0.7rem;
+  padding: 0.5rem 0.65rem;
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  gap: 0.55rem;
+  align-items: start;
+}
+
+.columnChecks li span {
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.82rem;
+}
+
+.columnChecks li strong {
+  font-size: 0.88rem;
+}
+
+.columnChecks li p {
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.columnOk span {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.columnIssue span {
+  background: #fee2e2;
+  color: #991b1b;
 }
 
 .status {
-  margin-top: 0.6rem;
   color: #0f766e;
 }
 
 .error {
-  margin-top: 0.6rem;
   color: #b91c1c;
+  font-weight: 500;
 }
 
 .muted {
@@ -128,13 +187,13 @@
 }
 
 .tableWrap {
-  margin-top: 0.8rem;
+  margin-top: 0.4rem;
   overflow: auto;
 }
 
 .tableWrap table {
   width: 100%;
-  min-width: 720px;
+  min-width: 760px;
   border-collapse: separate;
   border-spacing: 0;
 }
@@ -142,7 +201,7 @@
 .tableWrap th,
 .tableWrap td {
   text-align: left;
-  padding: 0.7rem 0.8rem;
+  padding: 0.72rem 0.8rem;
   border-bottom: 1px solid #e2e8f0;
 }
 
@@ -157,12 +216,77 @@
   background: #f8fafc;
 }
 
-@media (max-width: 700px) {
+.invalidCell {
+  background: #fee2e2;
+  color: #7f1d1d;
+  border-bottom-color: #fecaca;
+}
+
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: grid;
+  place-items: center;
+  z-index: 40;
+  padding: 1rem;
+}
+
+.modal {
+  width: min(860px, 100%);
+  max-height: min(85vh, 860px);
+  overflow: auto;
+  border-radius: 1rem;
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  padding: 1rem;
+  display: grid;
+  gap: 0.8rem;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.modalHeader h3 {
+  font-family: var(--font-heading), "Segoe UI", sans-serif;
+  font-size: 1.3rem;
+}
+
+.modalHeader button {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  border-radius: 0.55rem;
+  min-height: 2.1rem;
+  padding: 0.35rem 0.7rem;
+  cursor: pointer;
+}
+
+.modalImages {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.modalImages img {
+  width: 100%;
+  height: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.65rem;
+}
+
+@media (max-width: 760px) {
   .page {
     padding: 1rem;
   }
 
-  .row {
+  .clientRow {
+    grid-template-columns: 1fr;
+  }
+
+  .columnChecks {
     grid-template-columns: 1fr;
   }
 }

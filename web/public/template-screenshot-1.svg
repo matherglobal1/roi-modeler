@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" fill="none">
+  <rect width="1200" height="360" fill="#F8FAFC"/>
+  <rect x="36" y="28" width="1128" height="304" rx="14" fill="white" stroke="#CBD5E1"/>
+  <text x="58" y="62" fill="#0F172A" font-family="Arial, sans-serif" font-size="22" font-weight="700">Template: Required Columns</text>
+  <rect x="58" y="82" width="1084" height="40" rx="8" fill="#ECFEFF" stroke="#14B8A6"/>
+  <text x="72" y="107" fill="#0F766E" font-family="Arial, sans-serif" font-size="16" font-weight="700">Client Name</text>
+  <text x="214" y="107" fill="#0F766E" font-family="Arial, sans-serif" font-size="16" font-weight="700">Channel</text>
+  <text x="316" y="107" fill="#0F766E" font-family="Arial, sans-serif" font-size="16" font-weight="700">Monthly Budget</text>
+  <text x="490" y="107" fill="#0F766E" font-family="Arial, sans-serif" font-size="16" font-weight="700">Projected Pipeline</text>
+  <text x="700" y="107" fill="#0F766E" font-family="Arial, sans-serif" font-size="16" font-weight="700">Projected Revenue</text>
+  <text x="898" y="107" fill="#0F766E" font-family="Arial, sans-serif" font-size="16" font-weight="700">Projected HQLs</text>
+  <text x="1048" y="107" fill="#0F766E" font-family="Arial, sans-serif" font-size="16" font-weight="700">Projected Leads</text>
+  <rect x="58" y="142" width="1084" height="148" rx="8" fill="#F8FAFC" stroke="#E2E8F0"/>
+  <text x="72" y="172" fill="#475569" font-family="Arial, sans-serif" font-size="15">One row per channel. Keep these column names exactly as shown.</text>
+  <text x="72" y="200" fill="#475569" font-family="Arial, sans-serif" font-size="15">All required columns must have values before upload.</text>
+  <text x="72" y="228" fill="#475569" font-family="Arial, sans-serif" font-size="15">Optional column: Diminishing Returns Beta (Optional)</text>
+  <text x="72" y="264" fill="#0F766E" font-family="Arial, sans-serif" font-size="14" font-weight="700">✓ Good format example is shown on the next screenshot.</text>
+</svg>

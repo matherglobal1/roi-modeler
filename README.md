@@ -79,6 +79,7 @@ API endpoint exposed by the UI app:
 
 - `GET /api/roi/latest`
 - `POST /api/roi/run` (upload `.xlsx` or `.csv`, then run optimizer)
+- `GET /api/roi/template` (download the required upload template)
 
 Upload flow:
 
