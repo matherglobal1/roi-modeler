@@ -1,0 +1,29 @@
+objectives:
+  pipeline:
+    pipeline: 1.0
+    revenue: 0.0
+    hqls: 0.0
+    leads: 0.0
+    roas: 0.05
+    cac: 0.0
+  revenue:
+    pipeline: 0.2
+    revenue: 1.0
+    hqls: 0.0
+    leads: 0.0
+    roas: 0.1
+    cac: 0.0
+  roas:
+    pipeline: 0.0
+    revenue: 0.7
+    hqls: 0.0
+    leads: 0.0
+    roas: 1.0
+    cac: 0.2
+  cac:
+    pipeline: 0.0
+    revenue: 0.0
+    hqls: 1.0
+    leads: 0.2
+    roas: 0.0
+    cac: 1.0

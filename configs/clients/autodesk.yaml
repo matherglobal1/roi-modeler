@@ -1,0 +1,12 @@
+client_id: autodesk
+description: Autodesk ROI baseline extracted from January 2026 workbook.
+data:
+  performance_csv: data/canonical/autodesk_performance.csv
+  baseline_csv: data/canonical/autodesk_channel_baseline.csv
+  constraints_csv: data/canonical/autodesk_constraints.csv
+run_defaults:
+  objective: pipeline
+  total_budget: 314000
+  guardrails:
+    min_roas: null
+    max_cac: null

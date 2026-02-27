@@ -1,0 +1,10 @@
+{
+  "client_id": "autodesk",
+  "total_budget": 314000.0,
+  "objective": "pipeline",
+  "objective_overrides": {},
+  "guardrails": {
+    "min_roas": null,
+    "max_cac": null
+  }
+}

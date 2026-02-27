@@ -1,0 +1,12 @@
+client_id: sample_enterprise
+description: Synthetic demo dataset generated from autodesk.
+data:
+  performance_csv: C:/Users/WillMather/Documents/JG/Projects/apps-internal/roi-modeler/data/sample/sample_enterprise_performance.csv
+  baseline_csv: C:/Users/WillMather/Documents/JG/Projects/apps-internal/roi-modeler/data/sample/sample_enterprise_channel_baseline.csv
+  constraints_csv: C:/Users/WillMather/Documents/JG/Projects/apps-internal/roi-modeler/data/sample/sample_enterprise_constraints.csv
+run_defaults:
+  objective: pipeline
+  total_budget: 276937.88
+  guardrails:
+    min_roas: 30.4089
+    max_cac: 112.1084
