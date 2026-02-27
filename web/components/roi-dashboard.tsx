@@ -6,7 +6,6 @@ import { useMemo, useState } from "react";
 import type { RoiChannelRecommendation, RoiSnapshot } from "@/lib/roi-data";
 import styles from "@/app/page.module.css";
 
-const OBJECTIVE_ORDER = ["pipeline", "revenue", "roas", "cac"];
 const OBJECTIVE_LABELS: Record<string, string> = {
   pipeline: "Pipeline",
   revenue: "Revenue",
@@ -56,14 +55,6 @@ function formatTimestamp(timestamp: string): string {
   });
 }
 
-function orderedObjectives(objectives: string[]): string[] {
-  return [...objectives].sort((a, b) => {
-    const left = OBJECTIVE_ORDER.indexOf(a);
-    const right = OBJECTIVE_ORDER.indexOf(b);
-    return (left === -1 ? 99 : left) - (right === -1 ? 99 : right);
-  });
-}
-
 function getBarWidth(value: number, total: number): string {
   if (total <= 0) {
     return "0%";
@@ -75,29 +66,39 @@ function formatObjective(objective: string): string {
   return OBJECTIVE_LABELS[objective] ?? objective.toUpperCase();
 }
 
-export default function RoiDashboard({ snapshot }: { snapshot: RoiSnapshot }) {
-  const clients = snapshot.clients;
-  const [clientId, setClientId] = useState(clients[0]?.clientId ?? "");
+function sourceLabel(source: RoiSnapshot["source"]): string {
+  if (source === "demo") {
+    return "Demo Data";
+  }
+  if (source === "live") {
+    return "Live Model Output";
+  }
+  return "Optimizer Output";
+}
 
+type DashboardProps = {
+  snapshot: RoiSnapshot;
+  initialClientId?: string;
+  initialScenarioId?: string;
+};
+
+export default function RoiDashboard({ snapshot, initialClientId, initialScenarioId }: DashboardProps) {
+  const clients = snapshot.clients;
+  const defaultClient = clients.find((client) => client.clientId === initialClientId) ?? clients[0];
+
+  const [clientId, setClientId] = useState(defaultClient?.clientId ?? "");
   const selectedClient = useMemo(() => {
     return clients.find((client) => client.clientId === clientId) ?? clients[0];
   }, [clientId, clients]);
 
-  const availableObjectives = useMemo(() => {
-    if (!selectedClient) {
-      return [];
-    }
-    return orderedObjectives(selectedClient.scenarios.map((scenario) => scenario.objective));
-  }, [selectedClient]);
-
-  const [objective, setObjective] = useState(availableObjectives[0] ?? "");
+  const scenarioOptions = useMemo(() => selectedClient?.scenarios ?? [], [selectedClient]);
+  const [scenarioId, setScenarioId] = useState(
+    scenarioOptions.find((item) => item.id === initialScenarioId)?.id ?? scenarioOptions[0]?.id ?? "",
+  );
 
   const scenario = useMemo(() => {
-    if (!selectedClient) {
-      return undefined;
-    }
-    return selectedClient.scenarios.find((item) => item.objective === objective) ?? selectedClient.scenarios[0];
-  }, [selectedClient, objective]);
+    return scenarioOptions.find((item) => item.id === scenarioId) ?? scenarioOptions[0];
+  }, [scenarioId, scenarioOptions]);
 
   const channels = useMemo(() => {
     return [...(scenario?.recommendations ?? [])].sort(
@@ -125,19 +126,16 @@ export default function RoiDashboard({ snapshot }: { snapshot: RoiSnapshot }) {
         end: cursor,
       };
     });
-
     const gradient = slices
       .map((slice) => `${slice.color} ${slice.start.toFixed(2)}% ${slice.end.toFixed(2)}%`)
       .join(", ");
-
     return { gradient: `conic-gradient(${gradient})`, slices };
   }, [channels, totalSpend]);
 
   function handleClientSelect(nextClientId: string) {
     setClientId(nextClientId);
-    const nextClient = clients.find((client) => client.clientId === nextClientId);
-    const nextObjectives = orderedObjectives((nextClient?.scenarios ?? []).map((item) => item.objective));
-    setObjective(nextObjectives[0] ?? "");
+    const nextClient = clients.find((item) => item.clientId === nextClientId);
+    setScenarioId(nextClient?.scenarios[0]?.id ?? "");
   }
 
   if (!scenario || !selectedClient) {
@@ -162,8 +160,8 @@ export default function RoiDashboard({ snapshot }: { snapshot: RoiSnapshot }) {
           </p>
         </div>
         <div className={styles.heroMeta}>
-          <span className={styles.sourcePill}>{snapshot.source === "demo" ? "Demo Data" : "Live Model Output"}</span>
-          <span>Scenario: {formatTimestamp(scenario.timestamp)}</span>
+          <span className={styles.sourcePill}>{sourceLabel(snapshot.source)}</span>
+          <span>{formatObjective(scenario.objective)} objective</span>
         </div>
       </section>
 
@@ -180,11 +178,11 @@ export default function RoiDashboard({ snapshot }: { snapshot: RoiSnapshot }) {
         </label>
 
         <label className={styles.controlField}>
-          <span>Objective</span>
-          <select value={scenario.objective} onChange={(event) => setObjective(event.target.value)}>
-            {availableObjectives.map((item) => (
-              <option key={item} value={item}>
-                {formatObjective(item)}
+          <span>Scenario</span>
+          <select value={scenario.id} onChange={(event) => setScenarioId(event.target.value)}>
+            {scenarioOptions.map((item) => (
+              <option key={item.id} value={item.id}>
+                {formatObjective(item.objective)} • {formatTimestamp(item.timestamp)}
               </option>
             ))}
           </select>
@@ -222,7 +220,10 @@ export default function RoiDashboard({ snapshot }: { snapshot: RoiSnapshot }) {
         <article className={styles.chartPanel}>
           <header className={styles.panelHeader}>
             <h2>Spend Allocation</h2>
-            <p>Channel mix optimized for {formatObjective(scenario.objective)}</p>
+            <p>
+              Channel mix for {selectedClient.clientId.replaceAll("_", " ")} on{" "}
+              {formatTimestamp(scenario.timestamp)}
+            </p>
           </header>
 
           <div className={styles.chartBody}>
@@ -301,3 +302,4 @@ export default function RoiDashboard({ snapshot }: { snapshot: RoiSnapshot }) {
     </main>
   );
 }
+

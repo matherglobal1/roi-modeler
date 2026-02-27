@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
@@ -28,7 +29,16 @@ export default function AppShell({ children }: { children: ReactNode }) {
       <aside className={styles.sidebar}>
         <div className={styles.brand}>
           <span className={styles.brandTop}>JUSTGLOBAL</span>
-          <strong>ROI Modeller</strong>
+          <div className={styles.logoWrap}>
+            <Image
+              src="/just-global-logo.png"
+              alt="JUST Global"
+              width={160}
+              height={18}
+              priority
+            />
+            <strong>ROI Modeller</strong>
+          </div>
         </div>
 
         <nav className={styles.nav} aria-label="Primary">

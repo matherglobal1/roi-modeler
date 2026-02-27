@@ -78,6 +78,15 @@ npm run dev
 API endpoint exposed by the UI app:
 
 - `GET /api/roi/latest`
+- `POST /api/roi/run` (upload `.xlsx` or `.csv`, then run optimizer)
+
+Upload flow:
+
+1. Open `web/upload-data`.
+2. Drag and drop a file (`.xlsx` Autodesk workbook or `.csv` with `channel` + spend columns).
+3. Review preview table.
+4. Click `Run Model`.
+5. You are redirected to Dashboard with the new client/scenario selected.
 
 ## Deploy To Vercel
 

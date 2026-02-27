@@ -6,6 +6,7 @@
       "clientId": "sample_enterprise",
       "scenarios": [
         {
+          "id": "pipeline__20260227_000000",
           "objective": "pipeline",
           "timestamp": "20260227_000000",
           "summaryFile": "demo_pipeline_summary.json",
@@ -125,6 +126,7 @@
           ]
         },
         {
+          "id": "revenue__20260227_000000",
           "objective": "revenue",
           "timestamp": "20260227_000000",
           "summaryFile": "demo_revenue_summary.json",

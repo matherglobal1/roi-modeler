@@ -28,9 +28,21 @@
 }
 
 .brand strong {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-family: var(--font-heading), "Segoe UI", sans-serif;
   color: #ffffff;
+}
+
+.logoWrap {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.logoWrap img {
+  background: #ffffff;
+  border-radius: 0.45rem;
+  padding: 0.22rem 0.35rem;
+  border: 1px solid rgba(148, 163, 184, 0.35);
 }
 
 .nav {

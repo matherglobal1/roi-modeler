@@ -24,6 +24,11 @@ When those files are not present (for example in fresh deploys), it serves `data
 API route:
 
 - `GET /api/roi/latest`
+- `POST /api/roi/run`
+
+Upload route:
+
+- `GET /upload-data` for drag-drop upload, preview, and one-click model run.
 
 ## Vercel
 

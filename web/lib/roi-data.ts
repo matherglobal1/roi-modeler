@@ -35,6 +35,7 @@ export type RoiChannelRecommendation = {
 };
 
 export type RoiScenario = {
+  id: string;
   objective: string;
   timestamp: string;
   summaryFile: string;
@@ -50,7 +51,7 @@ export type RoiClientData = {
 
 export type RoiSnapshot = {
   generatedAt: string;
-  source: "optimizer_outputs" | "demo";
+  source: "optimizer_outputs" | "live" | "demo";
   clients: RoiClientData[];
 };
 
@@ -165,6 +166,9 @@ export async function loadRoiSnapshot(): Promise<RoiSnapshot> {
     const scenarioFiles = new Map<
       string,
       {
+        clientId: string;
+        objective: string;
+        timestamp: string;
         summary?: { fileName: string; timestamp: string };
         recommendation?: { fileName: string; timestamp: string };
       }
@@ -172,22 +176,24 @@ export async function loadRoiSnapshot(): Promise<RoiSnapshot> {
 
     for (const file of files) {
       const parsed = file.parsed;
-      const key = `${parsed.clientId}|${parsed.objective}`;
-      const existing = scenarioFiles.get(key) ?? {};
+      const key = `${parsed.clientId}|${parsed.objective}|${parsed.timestamp}`;
+      const existing = scenarioFiles.get(key) ?? {
+        clientId: parsed.clientId,
+        objective: parsed.objective,
+        timestamp: parsed.timestamp,
+      };
       const current = existing[parsed.kind];
-      if (!current || parsed.timestamp > current.timestamp) {
+      if (!current) {
         existing[parsed.kind] = { fileName: file.name, timestamp: parsed.timestamp };
       }
       scenarioFiles.set(key, existing);
     }
 
     const clientsMap = new Map<string, RoiScenario[]>();
-    for (const [key, value] of scenarioFiles.entries()) {
+    for (const [, value] of scenarioFiles.entries()) {
       if (!value.summary || !value.recommendation) {
         continue;
       }
-
-      const [clientId, objective] = key.split("|");
       const [summaryRaw, recommendationRaw] = await Promise.all([
         fs.readFile(path.join(outputDir, value.summary.fileName), "utf8"),
         fs.readFile(path.join(outputDir, value.recommendation.fileName), "utf8"),
@@ -195,22 +201,28 @@ export async function loadRoiSnapshot(): Promise<RoiSnapshot> {
 
       const summary = JSON.parse(summaryRaw) as RoiSummary;
       const recommendations = parseCsvToObjects(recommendationRaw) as RoiChannelRecommendation[];
-      const scenarios = clientsMap.get(clientId) ?? [];
+      const scenarios = clientsMap.get(value.clientId) ?? [];
       scenarios.push({
-        objective,
+        id: `${value.objective}__${value.timestamp}`,
+        objective: value.objective,
         timestamp: value.summary.timestamp,
         summaryFile: value.summary.fileName,
         recommendationFile: value.recommendation.fileName,
         summary,
         recommendations,
       });
-      clientsMap.set(clientId, scenarios);
+      clientsMap.set(value.clientId, scenarios);
     }
 
     const clients = Array.from(clientsMap.entries())
       .map(([clientId, scenarios]) => ({
         clientId,
-        scenarios: scenarios.sort((a, b) => a.objective.localeCompare(b.objective)),
+        scenarios: scenarios.sort((a, b) => {
+          if (a.timestamp === b.timestamp) {
+            return a.objective.localeCompare(b.objective);
+          }
+          return b.timestamp.localeCompare(a.timestamp);
+        }),
       }))
       .sort((a, b) => a.clientId.localeCompare(b.clientId));
 
